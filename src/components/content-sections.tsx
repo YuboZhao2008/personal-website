@@ -11,13 +11,7 @@ import {
 } from "lucide-react";
 import { profile } from "@/data/profile";
 import { AnimatedSection } from "./animated-section";
-import {
-  AchievementCard,
-  Button,
-  SectionHeading,
-  SkillBadge,
-  TimelineItem,
-} from "./ui";
+import { AchievementCard, Button, SectionHeading, TimelineItem } from "./ui";
 import { ProjectCard } from "./project-card";
 
 export function About() {
@@ -52,7 +46,7 @@ export function Experience() {
       id="experience"
       className="section-shell section-space split-section"
     >
-      <AnimatedSection>
+      <AnimatedSection className="experience-heading">
         <SectionHeading
           number="02"
           eyebrow="THE JOURNEY"
@@ -60,12 +54,16 @@ export function Experience() {
           description="AI competition, quantitative experience, and robotics on the world stage."
         />
       </AnimatedSection>
-      <AnimatedSection className="timeline">
+      <div className="timeline">
         {profile.experiences.map((experience) => (
-          <TimelineItem key={experience.id} {...experience} />
+          <AnimatedSection key={experience.id} className="timeline-entry">
+            <TimelineItem {...experience} />
+          </AnimatedSection>
         ))}
-        <TimelineItem {...profile.education} />
-      </AnimatedSection>
+        <AnimatedSection className="timeline-entry">
+          <TimelineItem {...profile.education} />
+        </AnimatedSection>
+      </div>
     </section>
   );
 }
@@ -86,8 +84,12 @@ export function Projects() {
       </AnimatedSection>
       <div className="projects-grid">
         {profile.projects.map((project, i) => (
-          <AnimatedSection key={project.id} delay={i * 0.08}>
-            <ProjectCard project={project} />
+          <AnimatedSection
+            key={project.id}
+            delay={i * 0.08}
+            className={i === 0 ? "featured-project-slot" : ""}
+          >
+            <ProjectCard project={project} featured={i === 0} />
           </AnimatedSection>
         ))}
       </div>
@@ -118,14 +120,19 @@ export function Skills() {
           return (
             <AnimatedSection key={group.title} delay={index * 0.06}>
               <div className="skill-group">
-                <Icon size={22} strokeWidth={1.4} />
-                <h3>{group.title}</h3>
-                <p className="skill-context">{group.context}</p>
-                <div className="skill-list">
-                  {group.items.map((item) => (
-                    <SkillBadge key={item}>{item}</SkillBadge>
-                  ))}
+                <div className="skill-heading">
+                  <Icon size={21} strokeWidth={1.4} aria-hidden="true" />
+                  <div>
+                    <h3>{group.title}</h3>
+                    <p className="skill-context">{group.context}</p>
+                  </div>
+                  <span className="skill-index">0{index + 1}</span>
                 </div>
+                <ul className="skill-list">
+                  {group.items.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
               </div>
             </AnimatedSection>
           );
@@ -178,7 +185,10 @@ export function Exploring() {
             <article className="exploring-item">
               <div className="lab-meta">
                 <span className="exploring-number">0{i + 1} /</span>
-                <span>{item.status}</span>
+                <span className="lab-status">
+                  <i aria-hidden="true" />
+                  {item.status}
+                </span>
               </div>
               <h3>{item.title}</h3>
               <p>{item.description}</p>

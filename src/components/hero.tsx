@@ -9,6 +9,7 @@ import { profile } from "@/data/profile";
 import { AnimatedSection } from "./animated-section";
 import { Button } from "./ui";
 import { SystemVisual } from "./system-visual";
+import { GlowSurface } from "./glow-surface";
 
 export function Hero() {
   return (
@@ -19,15 +20,12 @@ export function Hero() {
             <div className="hero-kicker">
               <span className="status-dot" /> CURIOUS MIND. BUILDER AT HEART.
             </div>
-            <h1>
-              {profile.name}
-              <span>
-                {profile.headline.lead}
-                <br />
-                {profile.headline.continuation}{" "}
-                <em>{profile.headline.accent}</em>
-              </span>
-            </h1>
+            <h1>{profile.name}</h1>
+            <p className="hero-statement">
+              {profile.headline.lead}
+              <br />
+              {profile.headline.continuation} <em>{profile.headline.accent}</em>
+            </p>
           </AnimatedSection>
           <AnimatedSection delay={0.1}>
             <p className="hero-education">
@@ -48,7 +46,9 @@ export function Hero() {
           </AnimatedSection>
         </div>
         <AnimatedSection className="hero-art" delay={0.2}>
-          <SystemVisual />
+          <GlowSurface>
+            <SystemVisual />
+          </GlowSurface>
         </AnimatedSection>
       </div>
       <div className="hero-bottom">

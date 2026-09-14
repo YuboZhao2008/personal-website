@@ -15,6 +15,7 @@ export function SystemVisual() {
         <div className="orbit orbit-one" />
         <div className="orbit orbit-two" />
         <div className="orbit orbit-three" />
+        <div className="orbit-signal" />
         <div className="axis axis-x" />
         <div className="axis axis-y" />
         <div className="core-halo" />

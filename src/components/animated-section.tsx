@@ -15,13 +15,13 @@ export function AnimatedSection({
   const reduceMotion = useReducedMotion();
   return (
     <motion.div
-      className={className}
+      className={`reveal-block ${className}`}
       initial={false}
       whileInView={
-        reduceMotion ? undefined : { y: [16, 0], opacity: [0.65, 1] }
+        reduceMotion ? undefined : { y: [12, 0], opacity: [0.72, 1] }
       }
       viewport={{ once: true, margin: "0px 0px -30px 0px" }}
-      transition={{ duration: 0.65, delay, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
     >
       {children}
     </motion.div>
