@@ -1,87 +1,42 @@
 export type Experience = {
   id: string;
   title: string;
-  organization: string | null;
-  period: string | null;
-  year: number | null;
-  team: string | null;
-  placement: string | null;
+  organization: string;
+  period: string;
+  year: number;
   category: string;
+  statement: string;
   description: string;
-  featured?: boolean;
+  disciplines: string[];
+  location?: string;
 };
-
-export type Achievement = {
-  id: string;
-  title: string;
-  year: number | null;
-  result: string | null;
-  detail: string;
-  kind: "ai" | "robotics" | "mathematics";
-  featured?: boolean;
-};
-
 export type Project = {
   id: string;
   title: string;
+  subtitle: string;
   category: string;
   description: string;
-  tags: string[];
-  visual: "intelligence" | "gesture" | "simulation";
-  status: string;
+  visual: "intelligence" | "medical" | "gesture" | "simulation";
+  presentation: "flagship" | "case-study" | "secondary";
   details: string[];
   technologies: string[];
   evaluation?: { result: string; context: string };
-  href?: string;
+  href?: string | null;
 };
-
+export type Achievement = {
+  id: string;
+  title: string;
+  shortTitle: string;
+  year: number | null;
+  result: string;
+  detail: string;
+};
 export type SkillGroup = {
-  id: "languages" | "ai" | "tools" | "web";
+  id: string;
   title: string;
   context: string;
-  items: string[];
-};
-
-// Unknown details stay null. Add verified dates, roles, team names, and results here.
-const ioai: Experience = {
-  id: "ioai",
-  title: "International Olympiad in Artificial Intelligence",
-  organization: "IOAI",
-  period: null,
-  year: null,
-  team: null,
-  placement: null,
-  category: "AI / COMPETITION",
-  description:
-    "AI olympiad experience at the intersection of machine learning and technical problem solving.",
-  featured: true,
-};
-
-const quantitativeInternship: Experience = {
-  id: "quant-internship",
-  title: "Quantitative internship",
-  organization: null,
-  period: null,
-  year: null,
-  team: null,
-  placement: null,
-  category: "PROFESSIONAL EXPERIENCE",
-  description:
-    "Internship experience in a quantitative setting. Role scope and technical work will be added as the details are finalized.",
-};
-
-const ftc: Experience = {
-  id: "ftc",
-  title: "FIRST Tech Challenge World Championship",
-  organization: "FIRST Tech Challenge",
-  period: null,
-  year: 2024,
-  team: null,
-  placement: "World Championship · 2nd place",
-  category: "ROBOTICS / COMPETITION",
-  description:
-    "Competed with a team at the 2024 World Championship, earning a second-place result. Robotics competition brought engineering, teamwork, and technical problem solving together under competition constraints.",
-  featured: true,
+  core: string[];
+  additional: string[];
 };
 
 export const profile = {
@@ -89,224 +44,270 @@ export const profile = {
   initials: "YZ",
   role: "1A Software Engineering",
   university: "University of Waterloo",
-  headline: {
-    lead: "Engineering ideas",
-    continuation: "into",
-    accent: "reality.",
-  },
+  location: "Waterloo, Ontario",
   introduction:
-    "Building AI agents, experimenting with computer vision, and connecting software to the physical world through robotics.",
-  location: "Waterloo, Canada",
-  // Replace null with verified URLs. Email is an address without the mailto: prefix.
+    "Building systems that perceive, reason, and interact with the world.",
+  // Keep unknown links null. Email is an address without the mailto: prefix.
   socials: {
     github: null as string | null,
-    linkedin: null as string | null,
-    email: null as string | null,
+    linkedin: "https://linkedin.com/in/yubozhao-ai" as string | null,
+    email: "bowenzhao2020@gmail.com" as string | null,
     resume: null as string | null,
   },
   education: {
-    id: "waterloo",
-    title: "Software Engineering",
-    organization: "University of Waterloo",
-    period: "Current · First year / 1A",
-    year: null,
-    team: null,
-    placement: null,
-    category: "EDUCATION",
-    description:
-      "Developing the mathematical and software foundations for building intelligent systems.",
-  } satisfies Experience,
+    degree: "Bachelor of Software Engineering",
+    graduation: 2031,
+    status: "1A",
+  },
   about:
-    "I'm a first-year / 1A Software Engineering student at the University of Waterloo, building at the intersection of AI, computer vision, and robotics. My projects explore how software can understand context, interpret physical input, and make decisions.",
+    "I'm a Software Engineering student at the University of Waterloo, working across machine learning, robotics, and intelligent software.",
   philosophy:
-    "I'm interested in the engineering behind useful AI products — and in turning experiments with new technologies into software that solves difficult problems. That extends to product engineering and startups.",
-  // Editorial order is intentional: IOAI, then professional quantitative experience.
-  experiences: [ioai, quantitativeInternship, ftc] satisfies Experience[],
+    "From competitive AI and international robotics to quantitative research, I'm interested in what happens when a model becomes part of a larger system — with inputs to interpret, decisions to make, and real constraints to work within.",
+  experiences: [
+    {
+      id: "ioai",
+      title: "Team Canada Member",
+      organization: "International Olympiad in Artificial Intelligence",
+      period: "2025",
+      year: 2025,
+      category: "COMPETITIVE ARTIFICIAL INTELLIGENCE",
+      statement: "Selected to represent Team Canada at IOAI 2025.",
+      description:
+        "Prepared across machine learning, deep learning, computer vision, NLP, data preparation, and model optimization. Worked on advanced AI problems involving algorithmic reasoning, experimental design, performance evaluation, and optimization under competitive constraints.",
+      disciplines: [
+        "Machine learning",
+        "Computer vision",
+        "NLP",
+        "Model optimization",
+      ],
+    },
+    {
+      id: "ftc",
+      title: "Robotics Team Member",
+      organization: "FIRST Tech Challenge World Championship",
+      period: "2024",
+      year: 2024,
+      category: "INTERNATIONAL ROBOTICS",
+      statement: "2nd Place Globally. Built together, under pressure.",
+      description:
+        "Collaborated across software, mechanical, electrical, and strategy to develop and optimize a competition robot for autonomous and driver-controlled performance. The work involved iterative engineering, sensor integration, autonomous-control logic, debugging, and performance tuning in a high-pressure international competition environment.",
+      disciplines: [
+        "Autonomous control",
+        "Sensor integration",
+        "Performance tuning",
+      ],
+    },
+    {
+      id: "quant-internship",
+      title: "Machine Learning / Quantitative Research Intern",
+      organization: "Shaanxi Shun Yicheng Investment Management Co., Ltd.",
+      period: "July – August 2025",
+      year: 2025,
+      location: "Xi'an, China",
+      category: "ML / QUANTITATIVE RESEARCH",
+      statement: "Examining the signal. Questioning the model.",
+      description:
+        "Supported financial machine-learning workflows through preprocessing, feature engineering, model evaluation, signal validation, and performance benchmarking. Investigated predictive modeling, risk analysis, backtesting, leakage prevention, generalization, and overfitting control.",
+      disciplines: [
+        "Feature engineering",
+        "Backtesting",
+        "Signal validation",
+        "Generalization",
+      ],
+    },
+  ] satisfies Experience[],
   projects: [
     {
-      id: "01",
+      id: "jarvis",
       title: "Jarvis",
-      category: "AI AGENTS / MULTIMODAL SYSTEMS",
-      description:
-        "An evolving personal AI assistant connecting voice, vision, and tool execution. Working toward a context-aware agent with persistent memory and useful automated workflows.",
-      tags: ["Python", "LLM APIs / Ollama", "Whisper", "OpenCV"],
+      subtitle: "Local Multimodal AI Assistant",
+      category: "AGENTS / MULTIMODAL SYSTEMS",
+      presentation: "flagship",
       visual: "intelligence",
-      status: "IN DEVELOPMENT",
+      description:
+        "A modular personal AI assistant bringing local LLM inference, speech, persistent memory, external APIs, and real-time computer vision into one system. Voice, text, and camera input meet in a unified multimodal assistant.",
       details: [
-        "Exploring speech recognition and synthesis alongside local models and API-based LLMs.",
-        "Combining computer vision, tool execution, and automation toward multimodal interaction.",
-        "Developing persistent memory and contextual understanding as part of the agent's direction.",
+        "Combines local LLM inference with external APIs through a modular Python system.",
+        "Connects speech-to-text and text-to-speech with text and camera input.",
+        "Integrates persistent memory and real-time computer vision alongside the language model.",
       ],
       technologies: [
         "Python",
-        "OpenAI / LLM APIs",
         "Ollama",
-        "Whisper",
-        "speech_recognition",
-        "pyttsx3",
         "OpenCV",
-        "PyTorch",
-        "spaCy",
-        "torchvision",
-        "PIL",
-        "face recognition",
-        "librosa",
-        "Ultralytics YOLO",
-        "MediaPipe",
+        "Speech systems",
+        "APIs",
+        "LLM integration",
       ],
+      href: null,
     },
     {
-      id: "02",
-      title: "Hand Gesture Computer Vision System",
-      category: "COMPUTER VISION / INTERFACES",
+      id: "brain-tumor",
+      title: "Brain Tumor Detection System",
+      subtitle: "Compact model. Careful evaluation.",
+      category: "MACHINE LEARNING / MEDICAL IMAGING",
+      presentation: "case-study",
+      visual: "medical",
       description:
-        "A camera-based interface that recognizes open-hand, closed-hand, and pointing gestures. Combines hand tracking with gesture-state logic and temporal smoothing for steadier interaction.",
-      tags: ["Python", "MediaPipe Hands", "Random Forest"],
+        "An MRI classification pipeline built with a compact vision-transformer architecture. The experiment goes beyond accuracy to examine precision, recall, F1 score, and the conditions under which a model generalizes.",
+      details: [
+        "Developed a Python / PyTorch pipeline using MiniMaxViT for MRI classification.",
+        "Experimented with image preprocessing, augmentation, oversampling, class balancing, and validation strategies.",
+        "Evaluated precision, recall, F1 score, and confusion matrices, with attention to generalization and dataset artifacts.",
+      ],
+      technologies: ["Python", "PyTorch", "MiniMaxViT", "Medical Imaging"],
+      href: null,
+    },
+    {
+      id: "gesture",
+      title: "Gesture-Controlled Drawing Interface",
+      subtitle: "From hand movement to intent.",
+      category: "COMPUTER VISION / INTERACTION",
+      presentation: "secondary",
       visual: "gesture",
-      status: "INTERFACE EXPERIMENT",
+      description:
+        "A real-time drawing interface that turns 21-point hand landmarks into open-hand, closed-hand, and pointing gestures using a Random Forest classifier.",
       details: [
-        "Built a custom gesture dataset and a Random Forest classifier around a MediaPipe Hands pipeline.",
-        "Developed pointing-position tracking, gesture smoothing, and tool switching.",
-        "Explored GoodNotes-oriented interaction concepts, including using hand gestures as interface input.",
+        "Implemented drawing, erasing, tool switching, snapshot capture, and precise pointing coordinates.",
+        "Used temporal smoothing, gesture-state logic, and latency controls to stabilize real-time interaction.",
       ],
-      technologies: [
-        "Python",
-        "MediaPipe Hands",
-        "Random Forest",
-        "Computer vision",
-        "Temporal smoothing",
-      ],
+      technologies: ["Python", "OpenCV", "MediaPipe", "scikit-learn"],
       evaluation: {
-        result: "≈98% test accuracy",
-        context:
-          "Measured in testing on the custom gesture dataset. This does not establish accuracy across real-world users, cameras, or lighting conditions.",
+        result: "≈98%",
+        context: "Test accuracy on the project's test split.",
       },
+      href: null,
     },
     {
-      id: "03",
-      title: "Future Simulation",
-      category: "SIMULATION / INTELLIGENT SYSTEMS",
-      description:
-        "An experimental Python simulation exploring evolving agents and entities. World-state logic, AI decision behavior, and seeded randomness shape how the simulated system develops.",
-      tags: ["Python", "Pygame", "NumPy", "Matplotlib"],
+      id: "future-sim",
+      title: "Future-Sim",
+      subtitle: "World Model Prototype",
+      category: "SIMULATION / PREDICTIVE SYSTEMS",
+      presentation: "secondary",
       visual: "simulation",
-      status: "EXPERIMENTAL SIMULATION",
+      description:
+        "A configurable simulation framework for world-state representation, environment dynamics, future-state generation, and outcome estimation. An exploration of predictive world-model reasoning.",
       details: [
-        "Working with simulation systems and world-state logic to manage interacting agents and entities.",
-        "Exploring AI decision behavior and the effect of randomness and seeding on a simulation's evolution.",
-        "Using Pygame, NumPy, and Matplotlib within the simulation toolkit.",
+        "Represented configurable world states and environment dynamics in a Python simulation framework.",
+        "Explored future-state generation and outcome estimation as building blocks for predictive world-model reasoning.",
       ],
-      technologies: ["Python", "Pygame", "NumPy", "Matplotlib"],
+      technologies: ["Python", "NumPy", "Pygame"],
+      href: null,
     },
   ] satisfies Project[],
-  skillGroups: [
-    {
-      id: "languages",
-      title: "Core languages",
-      context: "Programming foundations",
-      items: ["Python", "C", "Racket", "HTML / CSS"],
-    },
-    {
-      id: "ai",
-      title: "AI & machine learning",
-      context: "Project experience and foundational workflows",
-      items: [
-        "PyTorch",
-        "OpenCV",
-        "MediaPipe",
-        "Ultralytics YOLO",
-        "Basic ML workflows",
-        "Computer vision",
-        "LLM integration",
-        "AI agents",
-      ],
-    },
-    {
-      id: "tools",
-      title: "Development tools",
-      context: "Version control and local development",
-      items: [
-        "Git",
-        "GitHub",
-        "GitLab",
-        "VS Code",
-        "Linux / WSL",
-        "PowerShell",
-        "Virtual environments",
-        "Command-line workflows",
-      ],
-    },
-    {
-      id: "web",
-      title: "Web & product engineering",
-      context: "Used in this portfolio",
-      items: ["React", "Next.js", "TypeScript / JavaScript", "Tailwind CSS"],
-    },
-  ] satisfies SkillGroup[],
   achievements: [
     {
-      id: ioai.id,
-      title: ioai.title,
-      year: ioai.year,
-      result: ioai.placement,
-      detail:
-        "IOAI experience in artificial intelligence and technical problem solving.",
-      kind: "ai",
-      featured: true,
+      id: "ioai",
+      title: "International Olympiad in Artificial Intelligence",
+      shortTitle: "IOAI",
+      year: 2025,
+      result: "TEAM CANADA",
+      detail: "Team member",
     },
     {
-      id: ftc.id,
-      title: ftc.title,
-      year: ftc.year,
-      result: ftc.placement,
-      detail:
-        "A team result on the world stage, bringing together robotics, engineering, and competitive problem solving.",
-      kind: "robotics",
-      featured: true,
+      id: "ftc",
+      title: "FTC World Championship",
+      shortTitle: "FTC WORLD",
+      year: 2024,
+      result: "2ND",
+      detail: "Globally · team result",
+    },
+    {
+      id: "euclid",
+      title: "Euclid Mathematics Contest",
+      shortTitle: "EUCLID",
+      year: 2026,
+      result: "86/100",
+      detail: "Honour Roll",
     },
     {
       id: "csmc",
       title: "Canadian Senior Mathematics Contest",
+      shortTitle: "CSMC",
       year: 2025,
-      result: "48 / 60",
-      detail:
-        "CSMC score, reflecting mathematical reasoning and contest problem solving.",
-      kind: "mathematics",
+      result: "48/60",
+      detail: "Honour Roll",
+    },
+    {
+      id: "sin",
+      title: "Sir Isaac Newton Physics Contest",
+      shortTitle: "SIN PHYSICS",
+      year: null,
+      result: "TOP 5%",
+      detail: "Globally",
     },
   ] satisfies Achievement[],
-  exploring: [
+  skillGroups: [
     {
-      title: "Jarvis — Personal AI Agent",
-      status: "BUILDING",
-      description:
-        "Connecting memory, multimodal input, and tool execution into a more useful personal assistant.",
+      id: "core",
+      title: "Core",
+      context: "The programming foundations",
+      core: ["Python", "C++", "Java"],
+      additional: [
+        "JavaScript",
+        "SQL",
+        "HTML/CSS",
+        "Object-Oriented Programming",
+        "Data Structures & Algorithms",
+      ],
     },
     {
-      title: "Multi-agent development workflows",
-      status: "EXPLORING",
-      description:
-        "How multiple AI agents can coordinate software work while keeping changes understandable and reviewable.",
+      id: "ml",
+      title: "AI / ML",
+      context: "From data to evaluation",
+      core: ["PyTorch", "scikit-learn", "Vision Transformers"],
+      additional: [
+        "NumPy",
+        "pandas",
+        "Matplotlib",
+        "CNNs",
+        "ResNet",
+        "YOLO",
+        "Transfer learning",
+        "Fine-tuning",
+        "Cross-validation",
+        "Feature engineering",
+        "Precision / recall / F1",
+        "ROC-AUC",
+      ],
     },
     {
-      title: "Computer vision interfaces",
-      status: "EXPERIMENTING",
-      description:
-        "Turning hand tracking and gesture recognition into deliberate, stable interface actions.",
+      id: "vision",
+      title: "Vision & robotics",
+      context: "Perception meets control",
+      core: ["OpenCV", "MediaPipe", "Sensor integration"],
+      additional: [
+        "PID control",
+        "IMU fundamentals",
+        "Sensor-fusion fundamentals",
+      ],
     },
     {
-      title: "AI-powered productivity",
-      status: "EXPLORING",
-      description:
-        "Small, useful systems that connect language models to everyday tools and workflows.",
+      id: "systems",
+      title: "Systems / software",
+      context: "Connecting the components",
+      core: [
+        "Ollama / local LLM integration",
+        "Multimodal systems",
+        "REST APIs",
+      ],
+      additional: [
+        "RAG fundamentals",
+        "Speech recognition",
+        "Git",
+        "GitHub",
+        "Linux",
+        "VS Code",
+      ],
     },
-  ],
+  ] satisfies SkillGroup[],
 };
 
 export const navigation = [
-  { label: "Home", href: "#home" },
-  { label: "About", href: "#about" },
+  { label: "Profile", href: "#about" },
   { label: "Experience", href: "#experience" },
   { label: "Projects", href: "#projects" },
+  { label: "Honours", href: "#achievements" },
   { label: "Skills", href: "#skills" },
   { label: "Contact", href: "#contact" },
 ];

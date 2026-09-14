@@ -1,8 +1,6 @@
 "use client";
-
-import { motion, useReducedMotion } from "framer-motion";
-import type { ReactNode } from "react";
-
+import { useEffect, useRef, type ReactNode, type CSSProperties } from "react";
+/** Content is visible in server HTML. Only the arrival treatment needs JS. */
 export function AnimatedSection({
   children,
   className = "",
@@ -12,18 +10,27 @@ export function AnimatedSection({
   className?: string;
   delay?: number;
 }) {
-  const reduceMotion = useReducedMotion();
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        element.dataset.visible = String(entry.isIntersecting);
+        if (entry.isIntersecting) element.dataset.entered = "true";
+      },
+      { threshold: 0, rootMargin: "0px 0px -24px 0px" },
+    );
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
   return (
-    <motion.div
+    <div
+      ref={ref}
       className={`reveal-block ${className}`}
-      initial={false}
-      whileInView={
-        reduceMotion ? undefined : { y: [12, 0], opacity: [0.72, 1] }
-      }
-      viewport={{ once: true, margin: "0px 0px -30px 0px" }}
-      transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
+      style={{ "--reveal-delay": `${delay}s` } as CSSProperties}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }

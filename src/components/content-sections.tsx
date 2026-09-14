@@ -1,18 +1,8 @@
-import {
-  ArrowUpRight,
-  Code2,
-  Cpu,
-  GraduationCap,
-  Terminal,
-  PanelsTopLeft,
-  Linkedin,
-  Mail,
-  Github,
-} from "lucide-react";
-import { profile } from "@/data/profile";
+import { ArrowDownRight, ArrowUpRight, Plus } from "lucide-react";
+import { profile, type Experience as ExperienceData } from "@/data/profile";
 import { AnimatedSection } from "./animated-section";
-import { AchievementCard, Button, SectionHeading, TimelineItem } from "./ui";
-import { ProjectCard } from "./project-card";
+import { SectionHeading } from "./ui";
+import { ProjectShowcase } from "./project-card";
 
 export function About() {
   return (
@@ -20,178 +10,220 @@ export function About() {
       <AnimatedSection>
         <SectionHeading
           number="01"
-          eyebrow="ABOUT"
-          title="Curiosity is the starting point."
+          eyebrow="PROFILE"
+          title="Between a model and the real world."
         />
+        <div className="education-record">
+          <span className="mono">UNIVERSITY OF WATERLOO</span>
+          <strong>{profile.education.degree}</strong>
+          <span>1A · Expected graduation {profile.education.graduation}</span>
+        </div>
       </AnimatedSection>
       <AnimatedSection className="about-content">
         <p className="large-body">{profile.about}</p>
         <p>{profile.philosophy}</p>
-        <div className="about-note">
-          <GraduationCap size={20} />
-          <span>
-            {profile.university}
-            <small>{profile.role}</small>
-          </span>
-          <span className="note-label">LEARNING BY BUILDING</span>
-        </div>
+        <a className="text-link" href="#experience">
+          The experience behind the work <ArrowDownRight size={18} />
+        </a>
       </AnimatedSection>
     </section>
   );
 }
 
+function ExperienceEntry({ experience }: { experience: ExperienceData }) {
+  return (
+    <article
+      id={`experience-${experience.id}`}
+      className={`experience-entry experience-${experience.id}`}
+    >
+      <div className="experience-year mono">
+        <span>{experience.year}</span>
+        <span>{experience.category}</span>
+      </div>
+      <div className="experience-identity">
+        {experience.id === "ioai" ? (
+          <div className="experience-display">
+            TEAM
+            <br />
+            <span>CANADA</span>
+            <span className="ioai-code mono">IOAI / 2025</span>
+          </div>
+        ) : experience.id === "ftc" ? (
+          <div className="experience-display ftc-result">
+            <span>
+              2<sup>ND</sup>
+            </span>
+            <span className="world-label">GLOBALLY</span>
+          </div>
+        ) : (
+          <div className="quant-mark" aria-hidden="true">
+            <span>f(x)</span>
+            <svg viewBox="0 0 300 65">
+              <path d="M0 32H300" />
+              <path
+                className="quant-signal ambient"
+                d="M0 32 20 38 35 21 48 45 62 39 75 16 90 43 108 22 123 39 138 17 150 34 164 51 177 25 190 41 208 20 224 48 240 16 257 39 275 23 300 32"
+              />
+            </svg>
+            <span className="mono">MODEL / TEST / VALIDATE</span>
+          </div>
+        )}
+        <h3>{experience.organization}</h3>
+        <p className="experience-role">{experience.title}</p>
+        {experience.location && (
+          <p className="experience-location mono">
+            {experience.period} · {experience.location}
+          </p>
+        )}
+      </div>
+      <div className="experience-copy">
+        <p className="experience-statement">{experience.statement}</p>
+        <p>{experience.description}</p>
+        <ul className="discipline-list">
+          {experience.disciplines.map((d) => (
+            <li key={d}>{d}</li>
+          ))}
+        </ul>
+      </div>
+    </article>
+  );
+}
 export function Experience() {
   return (
     <section
       id="experience"
-      className="section-shell section-space split-section"
+      className="section-shell section-space experience-section"
     >
-      <AnimatedSection className="experience-heading">
+      <AnimatedSection className="section-title-row">
         <SectionHeading
           number="02"
-          eyebrow="THE JOURNEY"
-          title="A foundation for what’s next."
-          description="AI competition, quantitative experience, and robotics on the world stage."
+          eyebrow="EXPERIENCE"
+          title="Tested beyond the classroom."
         />
+        <p className="section-aside">
+          Competitive AI. International robotics.
+          <br />
+          Research under real constraints.
+        </p>
       </AnimatedSection>
-      <div className="timeline">
+      <div className="experience-list">
         {profile.experiences.map((experience) => (
-          <AnimatedSection key={experience.id} className="timeline-entry">
-            <TimelineItem {...experience} />
+          <AnimatedSection key={experience.id}>
+            <ExperienceEntry experience={experience} />
           </AnimatedSection>
         ))}
-        <AnimatedSection className="timeline-entry">
-          <TimelineItem {...profile.education} />
-        </AnimatedSection>
+      </div>
+      <div className="experience-bridge mono">
+        <span>COMPETE → EXPERIMENT → ENGINEER</span>
+        <ArrowDownRight size={22} />
+        <span>THE WORK CONTINUES IN SYSTEMS</span>
       </div>
     </section>
   );
 }
-
 export function Projects() {
   return (
-    <section id="projects" className="section-shell section-space">
+    <section
+      id="projects"
+      className="section-shell section-space projects-section"
+    >
       <AnimatedSection className="section-title-row">
         <SectionHeading
           number="03"
-          eyebrow="PROJECTS & EXPERIMENTS"
-          title="Ideas, made tangible."
-          description="Personal agents, vision-based interfaces, and simulated worlds."
+          eyebrow="SELECTED SYSTEMS"
+          title="Intelligence, assembled."
+          description="Four explorations in how software perceives, reasons, and responds."
         />
-        <span className="small-label">
-          THE PROJECT NOTEBOOK <ArrowUpRight size={15} />
+        <span className="section-counter mono">
+          01 — 04
+          <br />
+          SELECTED WORK
         </span>
       </AnimatedSection>
-      <div className="projects-grid">
-        {profile.projects.map((project, i) => (
+      <div className="project-exhibits">
+        {profile.projects.map((project, index) => (
           <AnimatedSection
             key={project.id}
-            delay={i * 0.08}
-            className={i === 0 ? "featured-project-slot" : ""}
+            className={`exhibit-slot exhibit-${project.presentation}`}
           >
-            <ProjectCard project={project} featured={i === 0} />
+            <ProjectShowcase project={project} index={index} />
           </AnimatedSection>
         ))}
       </div>
     </section>
   );
 }
-
-const skillIcons = {
-  languages: Code2,
-  ai: Cpu,
-  tools: Terminal,
-  web: PanelsTopLeft,
-};
-export function Skills() {
+export function Achievements() {
   return (
-    <section id="skills" className="section-shell section-space">
-      <AnimatedSection>
-        <SectionHeading
-          number="04"
-          eyebrow="SKILLS & TECHNOLOGIES"
-          title="A toolkit that keeps growing."
-          description="Programming foundations, applied AI experiments, and the tools behind the work."
-        />
-      </AnimatedSection>
-      <div className="skills-grid">
-        {profile.skillGroups.map((group, index) => {
-          const Icon = skillIcons[group.id];
-          return (
-            <AnimatedSection key={group.title} delay={index * 0.06}>
-              <div className="skill-group">
-                <div className="skill-heading">
-                  <Icon size={21} strokeWidth={1.4} aria-hidden="true" />
-                  <div>
-                    <h3>{group.title}</h3>
-                    <p className="skill-context">{group.context}</p>
-                  </div>
-                  <span className="skill-index">0{index + 1}</span>
+    <section id="achievements" className="honours-section">
+      <div className="section-shell">
+        <AnimatedSection className="section-title-row">
+          <SectionHeading
+            number="04"
+            eyebrow="HONOURS & COMPETITIONS"
+            title="A record of the work."
+          />
+          <span className="honours-cross" aria-hidden="true">
+            ↗
+          </span>
+        </AnimatedSection>
+        <div className="honours-grid">
+          {profile.achievements.map((achievement) => (
+            <AnimatedSection key={achievement.id}>
+              <article className={`honour honour-${achievement.id}`}>
+                <div className="honour-label mono">
+                  <span>{achievement.shortTitle}</span>
+                  {achievement.year && <span>{achievement.year}</span>}
                 </div>
-                <ul className="skill-list">
-                  {group.items.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              </div>
+                <strong className="honour-result">{achievement.result}</strong>
+                <p>{achievement.detail}</p>
+                <h3>{achievement.title}</h3>
+              </article>
             </AnimatedSection>
-          );
-        })}
+          ))}
+        </div>
       </div>
     </section>
   );
 }
-
-export function Achievements() {
+export function Skills() {
   return (
-    <section
-      id="achievements"
-      className="section-shell section-space achievements-section"
-    >
+    <section id="skills" className="section-shell section-space skills-section">
       <AnimatedSection>
         <SectionHeading
           number="05"
-          eyebrow="MILESTONES"
-          title="Progress, earned."
+          eyebrow="TECHNICAL TOOLKIT"
+          title="The parts behind the systems."
+          description="Programming foundations, learning algorithms, and the interfaces between software and the physical world."
         />
       </AnimatedSection>
-      <div className="achievements-grid">
-        {profile.achievements.map((achievement, index) => (
-          <AnimatedSection key={achievement.id} delay={index * 0.06}>
-            <AchievementCard {...achievement} />
-          </AnimatedSection>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-export function Exploring() {
-  return (
-    <section id="exploring" className="section-shell section-space">
-      <AnimatedSection className="section-title-row">
-        <SectionHeading
-          number="06"
-          eyebrow="ON MY RADAR"
-          title="Still asking. Still building."
-        />
-        <span className="live-label">
-          <span className="status-dot" /> CURRENT EXPLORATIONS
-        </span>
-      </AnimatedSection>
-      <div className="exploring-grid">
-        {profile.exploring.map((item, i) => (
-          <AnimatedSection key={item.title} delay={i * 0.06}>
-            <article className="exploring-item">
-              <div className="lab-meta">
-                <span className="exploring-number">0{i + 1} /</span>
-                <span className="lab-status">
-                  <i aria-hidden="true" />
-                  {item.status}
-                </span>
+      <div className="skill-rows">
+        {profile.skillGroups.map((group, i) => (
+          <AnimatedSection key={group.id}>
+            <article className="skill-row">
+              <div className="skill-heading">
+                <span className="mono">0{i + 1}</span>
+                <h3>{group.title}</h3>
+                <p>{group.context}</p>
               </div>
-              <h3>{item.title}</h3>
-              <p>{item.description}</p>
+              <div className="skill-content">
+                <ul className="core-skills">
+                  {group.core.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+                <details className="skill-details">
+                  <summary>
+                    More {group.title.toLowerCase()} skills{" "}
+                    <Plus size={15} aria-hidden="true" />
+                  </summary>
+                  <ul>
+                    {group.additional.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                </details>
+              </div>
             </article>
           </AnimatedSection>
         ))}
@@ -199,52 +231,55 @@ export function Exploring() {
     </section>
   );
 }
-
 export function Contact() {
+  const links = [
+    {
+      label: "Email",
+      value: profile.socials.email,
+      href: profile.socials.email ? `mailto:${profile.socials.email}` : null,
+    },
+    { label: "LinkedIn", value: "yubozhao-ai", href: profile.socials.linkedin },
+    {
+      label: "GitHub",
+      value: "View repositories",
+      href: profile.socials.github,
+    },
+    { label: "Résumé", value: "View résumé", href: profile.socials.resume },
+  ].filter((link) => link.href);
   return (
     <section id="contact" className="section-shell contact-section">
       <AnimatedSection>
         <div className="eyebrow">
-          <span>07</span> <span>START A CONVERSATION</span>
+          <span>06 /</span> BUILD / COLLABORATE / EXPERIMENT
         </div>
         <h2>
-          Good things start
+          Let?s build
           <br />
-          with a <em>hello.</em>
+          what comes <span>next.</span>
           <ArrowUpRight aria-hidden="true" />
         </h2>
         <div className="contact-bottom">
           <p>
-            Interesting problem? Ambitious idea?
+            Have a difficult problem or an idea worth exploring?
             <br />
-            I’d love to hear what you’re working on.
+            I?d like to hear about it.
           </p>
           <div className="contact-links">
-            <Button
-              href={
-                profile.socials.email ? `mailto:${profile.socials.email}` : null
-              }
-              variant="primary"
-            >
-              Say hello <Mail size={16} />
-            </Button>
-            <Button href={profile.socials.linkedin} variant="text">
-              <Linkedin size={18} />
-              <span className="sr-only">LinkedIn</span>
-            </Button>
-            <Button href={profile.socials.github} variant="text">
-              <Github size={18} />
-              <span className="sr-only">GitHub</span>
-            </Button>
+            {links.map((link) => (
+              <a
+                key={link.label}
+                href={link.href!}
+                {...(link.href!.startsWith("https://")
+                  ? { target: "_blank", rel: "noopener noreferrer" }
+                  : {})}
+              >
+                <span className="mono">{link.label}</span>
+                <span>{link.value}</span>
+                <ArrowUpRight size={19} />
+              </a>
+            ))}
           </div>
         </div>
-        {!profile.socials.email &&
-          !profile.socials.linkedin &&
-          !profile.socials.github && (
-            <p className="contact-pending">
-              Contact links are being set up. Check back soon.
-            </p>
-          )}
       </AnimatedSection>
     </section>
   );

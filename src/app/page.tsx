@@ -6,23 +6,20 @@ import {
   Projects,
   Skills,
   Achievements,
-  Exploring,
   Contact,
 } from "@/components/content-sections";
 import { Footer } from "@/components/footer";
-
 export default function Home() {
   return (
     <>
       <Navbar />
-      <main id="main">
+      <main id="main" tabIndex={-1}>
         <Hero />
         <About />
         <Experience />
         <Projects />
-        <Skills />
         <Achievements />
-        <Exploring />
+        <Skills />
         <Contact />
       </main>
       <Footer />

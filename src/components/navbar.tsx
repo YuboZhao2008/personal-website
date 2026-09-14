@@ -31,7 +31,7 @@ export function Navbar() {
       },
       { rootMargin: "-15% 0px -55% 0px", threshold: 0 },
     );
-    navigation.forEach(({ href }) => {
+    [{ href: "#home" }, ...navigation].forEach(({ href }) => {
       const section = document.querySelector(href);
       if (section) observer.observe(section);
     });
@@ -92,7 +92,7 @@ export function Navbar() {
             ))}
           </nav>
           <a className="nav-contact" href="#contact">
-            Let’s talk <ArrowUpRight size={14} />
+            Get in touch <ArrowUpRight size={14} />
           </a>
           <button
             ref={toggle}

@@ -1,68 +1,63 @@
 import { ArrowUpRight, Plus } from "lucide-react";
 import type { Project } from "@/data/profile";
-import { SkillBadge } from "./ui";
-
 import { ProjectVisual } from "./project-visual";
-export function ProjectCard({
+
+export function ProjectShowcase({
   project,
-  featured = false,
+  index,
 }: {
   project: Project;
-  featured?: boolean;
+  index: number;
 }) {
   return (
-    <article className={`project-card${featured ? " project-featured" : ""}`}>
-      <ProjectVisual variant={project.visual} />
+    <article
+      id={`project-${project.id}`}
+      className={`project-showcase project-${project.presentation} project-${project.visual}`}
+    >
       <div className="project-body">
-        <div className="project-meta">
+        <div className="project-meta mono">
           <span>{project.category}</span>
-          <span>
-            {featured ? "FEATURED / " : ""}
-            {project.id}
-          </span>
+          <span>0{index + 1} /</span>
         </div>
-        <h3>
-          {project.href ? (
-            <a href={project.href} target="_blank" rel="noopener noreferrer">
-              {project.title}
-              <ArrowUpRight size={18} />
-            </a>
-          ) : (
-            project.title
-          )}
-        </h3>
-        <p>{project.description}</p>
-        <div className="project-tags">
-          {project.tags.map((tag) => (
-            <SkillBadge key={tag}>{tag}</SkillBadge>
+        <h3>{project.title}</h3>
+        <p className="project-subtitle">{project.subtitle}</p>
+        <p className="project-description">{project.description}</p>
+        <ul className="project-technologies">
+          {project.technologies.map((tech) => (
+            <li key={tech}>{tech}</li>
           ))}
-        </div>
-        <span className="content-status">{project.status}</span>
+        </ul>
         {project.evaluation && (
           <div className="project-evaluation">
             <strong>{project.evaluation.result}</strong>
-            <p>{project.evaluation.context}</p>
+            <span>{project.evaluation.context}</span>
           </div>
         )}
         <details className="project-details">
           <summary>
             Engineering notes
             <span className="sr-only"> for {project.title}</span>
-            <Plus size={15} aria-hidden="true" />
+            <Plus size={17} aria-hidden="true" />
           </summary>
           <ul>
             {project.details.map((detail) => (
               <li key={detail}>{detail}</li>
             ))}
           </ul>
-          <p className="technology-label">
-            {project.id === "01"
-              ? "Technologies explored"
-              : "Technical toolkit"}
-          </p>
-          <p>{project.technologies.join(" · ")}</p>
         </details>
+        {project.href && (
+          <a
+            className="project-link"
+            href={project.href}
+            {...(project.href.startsWith("https://")
+              ? { target: "_blank", rel: "noopener noreferrer" }
+              : {})}
+          >
+            Explore project <ArrowUpRight size={16} />
+          </a>
+        )}
       </div>
+      <ProjectVisual variant={project.visual} />
     </article>
   );
 }

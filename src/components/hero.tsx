@@ -1,67 +1,73 @@
-import {
-  ArrowDown,
-  ArrowDownRight,
-  ArrowUpRight,
-  FileText,
-  Github,
-} from "lucide-react";
+import { ArrowDown, ArrowUpRight } from "lucide-react";
 import { profile } from "@/data/profile";
 import { AnimatedSection } from "./animated-section";
 import { Button } from "./ui";
 import { SystemVisual } from "./system-visual";
-import { GlowSurface } from "./glow-surface";
 
 export function Hero() {
   return (
     <section id="home" className="hero section-shell">
+      <div className="hero-register mono">
+        <span>YUBO ZHAO / PERSONAL PORTFOLIO</span>
+        <span>
+          <i className="status-dot" /> WATERLOO, ON
+        </span>
+      </div>
       <div className="hero-main">
         <div className="hero-copy">
           <AnimatedSection>
-            <div className="hero-kicker">
-              <span className="status-dot" /> CURIOUS MIND. BUILDER AT HEART.
-            </div>
-            <h1>{profile.name}</h1>
-            <p className="hero-statement">
-              {profile.headline.lead}
-              <br />
-              {profile.headline.continuation} <em>{profile.headline.accent}</em>
+            <p className="hero-kicker mono">
+              SOFTWARE ENGINEERING × INTELLIGENT SYSTEMS
             </p>
-          </AnimatedSection>
-          <AnimatedSection delay={0.1}>
+            <h1 aria-label={profile.name}>
+              YUBO
+              <span>
+                ZHAO<span className="name-period">.</span>
+              </span>
+            </h1>
+            <p className="hero-statement">{profile.introduction}</p>
             <p className="hero-education">
-              {profile.role} <span>@</span> {profile.university}
+              {profile.university}
+              <span>
+                {profile.role} · Class of {profile.education.graduation}
+              </span>
             </p>
-            <p className="hero-description">{profile.introduction}</p>
             <div className="hero-actions">
               <Button href="#projects" variant="primary">
-                View projects <ArrowUpRight size={17} />
+                Explore the systems <ArrowDown size={16} />
               </Button>
-              <Button href={profile.socials.resume}>
-                <FileText size={15} /> View résumé
-              </Button>
-              <Button href={profile.socials.github} variant="text">
-                <Github size={17} /> GitHub
+              <Button href="#contact" variant="text">
+                Get in touch <ArrowUpRight size={16} />
               </Button>
             </div>
           </AnimatedSection>
         </div>
-        <AnimatedSection className="hero-art" delay={0.2}>
-          <GlowSurface>
-            <SystemVisual />
-          </GlowSurface>
+        <AnimatedSection className="hero-art" delay={0.12}>
+          <SystemVisual />
         </AnimatedSection>
       </div>
-      <div className="hero-bottom">
-        <a href="#about">
-          <span className="scroll-icon">
-            <ArrowDown size={14} />
-          </span>{" "}
-          A little more about me
+      <div className="hero-credentials">
+        <a href="#experience">
+          <span className="mono">01 / ARTIFICIAL INTELLIGENCE</span>
+          <strong>
+            Team Canada <ArrowUpRight size={18} />
+          </strong>
+          <span>IOAI 2025</span>
         </a>
-        <span>
-          SOFTWARE <i /> INTELLIGENCE <i /> REAL-WORLD IMPACT{" "}
-          <ArrowDownRight size={17} />
-        </span>
+        <a href="#experience-ftc">
+          <span className="mono">02 / ROBOTICS</span>
+          <strong>
+            2nd globally <ArrowUpRight size={18} />
+          </strong>
+          <span>FTC World Championship 2024</span>
+        </a>
+        <a href="#experience-quant-internship">
+          <span className="mono">03 / RESEARCH</span>
+          <strong>
+            ML × Quant <ArrowUpRight size={18} />
+          </strong>
+          <span>Research internship · 2025</span>
+        </a>
       </div>
     </section>
   );

@@ -11,14 +11,14 @@
   height: 82px;
   z-index: 30;
   border-bottom: 1px solid transparent;
-  background: #10121075;
+  background: #141614ed;
   transition:
     background 0.3s,
     border-color 0.3s;
 }
 .site-header.is-scrolled,
 .site-header.menu-open {
-  background: #101210ed;
+  background: #141614f5;
   backdrop-filter: blur(14px);
   border-color: #a2b58b18;
 }
@@ -44,7 +44,7 @@
     background 0.25s;
   position: relative;
   padding: 13px 15px;
-  border-radius: 6px;
+  border-radius: 0;
 }
 .navigation a::after {
   content: "";
@@ -72,7 +72,7 @@
   font-size: 12px;
   border: 1px solid #414a37;
   padding: 10px 15px;
-  border-radius: 6px;
+  border-radius: 0;
   transition: border-color 0.25s;
 }
 .menu-toggle {
