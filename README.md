@@ -17,7 +17,7 @@ npm run dev
 
 Open http://localhost:3000. On Windows with PowerShell script execution disabled, use `npm.cmd` instead of `npm`.
 
-Copy `.env.example` to `.env.local` when configuring the public domain. Set `SITE_URL` to the actual HTTP(S) origin, without a path, query, or fragment. Leave it empty until a domain is chosen.
+No environment variables are required to run the site. Copy `.env.example` to `.env.local` only when configuring `SITE_URL` for local metadata testing; never commit local environment files.
 
 ## Production
 
@@ -97,19 +97,39 @@ Configure `profile.socials` in `src/data/profile.ts`:
 
 To add a résumé, create `public/resume.pdf` and set `resume: "/resume.pdf"`, or use a verified HTTPS URL. To add project destinations, set each project's `href`. Missing optional links are omitted, including their controls. No phone number is displayed.
 
-## Metadata and deployment
+## GitHub → Vercel deployment
 
-`src/data/site.ts` holds the SEO title and description. Set `SITE_URL` in the deployment environment **before building**. It enables the canonical URL, OpenGraph URL/image, Twitter large-image card, and sitemap entry. Without it, descriptive metadata still renders, `/sitemap.xml` contains no guessed URL, and `/robots.txt` omits its sitemap line. The sharing image remains available at `/share-image`.
+Use a **public** GitHub repository for this portfolio. Create an empty repository without initializing a README, license, or gitignore, so its history does not conflict with this existing repository. The local branch at deployment preparation is `master`, with no remote configured. Review the changes and commit them, then connect your repository:
 
-Deploy to a host with Next.js support, or a Node.js server:
+```sh
+git add .gitignore README.md
+git commit -m "Prepare GitHub and Vercel deployment"
+git branch -m main
+git remote add origin "<MY-GITHUB-REPO-URL>"
+git push -u origin main
+```
 
-1. Install with `npm ci`.
-2. Configure `SITE_URL` and any real profile/project links.
-3. Run `npm run build`.
-4. Run `npm start` behind the host's HTTPS endpoint (or let the Next.js hosting integration serve the build).
-5. Run the browser checks against the production URL.
+Replace the URL placeholder with the clone URL of the repository you created. The branch rename preserves every existing commit; no force push is needed. Public Git history includes commit author/committer metadata as well as files, so review the existing identity locally before publishing. For future commits, use an identity associated with your GitHub account, including its GitHub-provided no-reply email if preferred.
 
-For Vercel, import the repository as a Next.js project, keep the root directory at the repository root, set `SITE_URL`, and use `npm run build`. Publishing is a separate deployment action; this repository does not configure credentials or auto-deploy.
+In Vercel, choose **Add New → Project**, connect GitHub, grant access to this repository, and import it. Use your personal **Hobby** plan and these settings:
+
+- Framework preset: **Next.js**; root directory: repository root (`./`).
+- Node.js: **24.x**, matching the validated local runtime.
+- Build command: detected `npm run build`; output directory: leave the Next.js default.
+- Install command: `npm ci` to install the committed lockfile exactly.
+- Environment variables: none required for the first deployment.
+
+Click **Deploy** and use the generated HTTPS `.vercel.app` production address. No custom domain, `vercel.json`, local server, or machine-specific filesystem is required. The site runs on Vercel even when your computer is off.
+
+Under **Settings → Environments → Production → Branch Tracking**, confirm `main`. Pushes/merges to `main` deploy to production; other branches and pull requests create Preview Deployments. Review previews before merging approved changes into `main`. Preview URLs are separate from the stable production address. See [Vercel Git integration](https://vercel.com/docs/git) for the standard workflow.
+
+## Public URL and environment configuration
+
+`src/data/site.ts` holds the SEO configuration. The only application variable is optional `SITE_URL`. After the first deployment, open **Project Settings → Environment Variables**, add it for **Production** using the actual stable Vercel production origin (including HTTPS, with no path/query/fragment), then redeploy. Do not use a temporary preview URL. Keep it unset in Preview, or use the same production origin there if canonical metadata is desired.
+
+It enables canonical, OpenGraph URL/image, Twitter large-image metadata, and the sitemap entry. Without it, the site still works, descriptive metadata remains, `/sitemap.xml` contains no guessed URL, and `/robots.txt` omits its sitemap line. `/share-image` remains available. Environment changes require a new build because these routes are prerendered. No API credentials are needed; `BASE_URL` and `BROWSER_PATH` are local browser-test options and are not Vercel application variables.
+
+When you choose a custom domain later, add it in **Project Settings → Domains**, follow Vercel's DNS instructions, make it the primary production domain, update `SITE_URL`, and redeploy. No domain is purchased or configured by this setup.
 
 ## Browser and accessibility checks
 

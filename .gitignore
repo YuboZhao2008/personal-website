@@ -2,6 +2,23 @@ node_modules/
 .next/
 out/
 *.tsbuildinfo
+
+# Local environment files; keep the empty configuration template.
 .env*
 !.env.example
+
+# Browser reports, coverage, and local Vercel project state.
 test-results/
+playwright-report/
+coverage/
+.vercel/
+
+# Logs and machine-specific editor/OS artifacts.
+*.log
+.DS_Store
+Thumbs.db
+Desktop.ini
+.idea/
+.vscode/
+*.swp
+*.swo
