@@ -37,7 +37,7 @@ export function Hero() {
               <Button href="#projects" variant="primary">
                 Explore the systems <ArrowDown size={16} />
               </Button>
-              <Button href={publicHref(profile.socials.resume, true)}>
+              <Button href={publicHref(profile.socials.resume, true)} newTab>
                 View Résumé <ArrowUpRight size={16} aria-hidden="true" />
               </Button>
               <Button href="#contact" variant="text">

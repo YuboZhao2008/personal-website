@@ -4,18 +4,20 @@ export function Button({
   href,
   variant = "secondary",
   className = "",
+  newTab = false,
 }: {
   children: ReactNode;
   href?: string | null;
   variant?: "primary" | "secondary" | "text";
   className?: string;
+  newTab?: boolean;
 }) {
   if (!href) return null;
   return (
     <a
       href={href}
       className={`button button-${variant} ${className}`}
-      {...(href.startsWith("https://")
+      {...(newTab || href.startsWith("https://")
         ? { target: "_blank", rel: "noopener noreferrer" }
         : {})}
     >

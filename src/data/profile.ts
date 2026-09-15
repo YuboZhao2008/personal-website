@@ -62,10 +62,10 @@ export const profile = {
     "Building systems that perceive, reason, and interact with the world.",
   // Keep unknown links null. Email is an address without the mailto: prefix.
   socials: {
-    github: null as string | null,
+    github: "https://github.com/YuboZhao2008" as string | null,
     linkedin: "https://linkedin.com/in/yubozhao-ai" as string | null,
     email: "bowenzhao2020@gmail.com" as string | null,
-    resume: null as string | null,
+    resume: "/resume.pdf" as string | null,
   },
   // Confirm status and availability before displaying a recruiting term or date.
   opportunity: {

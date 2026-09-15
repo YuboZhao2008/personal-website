@@ -111,7 +111,7 @@ When adding projects, update the section introduction and counter in `src/compon
 | Project `repositoryUrl`, `demoUrl`, `caseStudyUrl`                                   | Optional evidence actions; only configured HTTPS destinations render                                |
 | Achievement `verificationUrl`, `team`, `teamNumber`, `resultDetail`, `scope`, `year` | Optional verification and context; missing fields remain hidden                                     |
 
-Keep unknown values `null` (or an empty `targetRoles` array). Evidence URLs are unset until the corresponding work is ready to share. For a local résumé, add the PDF at `public/resume.pdf` before setting `resume: "/resume.pdf"`. Link handling is centralized in `src/data/links.ts`.
+Keep unknown values `null` (or an empty `targetRoles` array). Evidence URLs are unset until the corresponding work is ready to share. The résumé is served from `public/resume.pdf` at `/resume.pdf`; replace that file to update it. Both résumé actions open in a new tab. Link handling is centralized in `src/data/links.ts`.
 
 ## Deployment
 

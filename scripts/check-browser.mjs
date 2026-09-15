@@ -579,8 +579,35 @@ try {
   });
   const resume = publicHref(profile.socials.resume, true);
   assert.equal(await resumeLinks.count(), resume ? 2 : 0);
-  for (const link of await resumeLinks.all())
+  for (const link of await resumeLinks.all()) {
     assert.equal(await link.getAttribute("href"), resume);
+    assert.equal(await link.getAttribute("target"), "_blank");
+    assert.equal(await link.getAttribute("download"), null);
+  }
+  if (resume) {
+    for (const section of ["#home", "#contact"])
+      assert.equal(
+        await page
+          .locator(section)
+          .getByRole("link", { name: "View Résumé", exact: true })
+          .count(),
+        1,
+      );
+  }
+  if (resume?.startsWith("/") && resume.endsWith(".pdf")) {
+    const response = await page.request.get(new URL(resume, baseURL).href);
+    assert.equal(response.status(), 200, "Local résumé must resolve");
+    assert.match(response.headers()["content-type"], /application\/pdf/);
+    assert(!response.headers()["content-disposition"]?.includes("attachment"));
+    const body = await response.body();
+    assert.equal(body.subarray(0, 5).toString(), "%PDF-");
+    assert(
+      body.equals(
+        fs.readFileSync(new URL(`../public${resume}`, import.meta.url)),
+      ),
+      "Served résumé must match the original PDF bytes",
+    );
+  }
   for (const project of profile.projects) {
     const evidence = page.locator(`#project-${project.id} .project-link`);
     const expected = projectEvidence(project);

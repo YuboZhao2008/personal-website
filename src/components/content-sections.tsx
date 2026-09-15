@@ -319,7 +319,8 @@ export function Contact() {
                 }
                 aria-label={link.label === "Résumé" ? "View Résumé" : undefined}
                 href={link.href!}
-                {...(link.href!.startsWith("https://")
+                {...(link.label === "Résumé" ||
+                link.href!.startsWith("https://")
                   ? { target: "_blank", rel: "noopener noreferrer" }
                   : {})}
               >
