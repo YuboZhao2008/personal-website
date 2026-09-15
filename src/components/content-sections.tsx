@@ -1,5 +1,6 @@
 import { ArrowDownRight, ArrowUpRight, Plus } from "lucide-react";
 import { profile, type Experience as ExperienceData } from "@/data/profile";
+import { publicHref } from "@/data/links";
 import { AnimatedSection } from "./animated-section";
 import { SectionHeading } from "./ui";
 import { ProjectShowcase } from "./project-card";
@@ -132,7 +133,7 @@ export function Projects() {
           number="03"
           eyebrow="SELECTED SYSTEMS"
           title="Intelligence, assembled."
-          description="Four explorations in how software perceives, reasons, and responds."
+          description="An AI assistant, MRI classification, gesture interaction, and a world-state prototype."
         />
         <span className="section-counter mono">
           01 — 04
@@ -163,9 +164,6 @@ export function Achievements() {
             eyebrow="HONOURS & COMPETITIONS"
             title="A record of the work."
           />
-          <span className="honours-cross" aria-hidden="true">
-            ↗
-          </span>
         </AnimatedSection>
         <div className="honours-grid">
           {profile.achievements.map((achievement) => (
@@ -178,6 +176,33 @@ export function Achievements() {
                 <strong className="honour-result">{achievement.result}</strong>
                 <p>{achievement.detail}</p>
                 <h3>{achievement.title}</h3>
+                {(achievement.team ||
+                  achievement.teamNumber ||
+                  achievement.resultDetail ||
+                  achievement.scope) && (
+                  <p className="achievement-context">
+                    {[
+                      achievement.team,
+                      achievement.teamNumber &&
+                        `Team ${achievement.teamNumber}`,
+                      achievement.resultDetail,
+                      achievement.scope,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </p>
+                )}
+                {publicHref(achievement.verificationUrl) && (
+                  <a
+                    className="achievement-verification"
+                    href={publicHref(achievement.verificationUrl)!}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`Verify ${achievement.title}`}
+                  >
+                    Verify result <ArrowUpRight size={14} aria-hidden="true" />
+                  </a>
+                )}
               </article>
             </AnimatedSection>
           ))}
@@ -194,7 +219,7 @@ export function Skills() {
           number="05"
           eyebrow="TECHNICAL TOOLKIT"
           title="The parts behind the systems."
-          description="Programming foundations, learning algorithms, and the interfaces between software and the physical world."
+          description="Programming, machine learning, computer vision, and software integration across the work above."
         />
       </AnimatedSection>
       <div className="skill-rows">
@@ -234,18 +259,35 @@ export function Skills() {
 export function Contact() {
   const links = [
     {
+      label: "Résumé",
+      value: "View Résumé",
+      href: publicHref(profile.socials.resume, true),
+    },
+    {
       label: "Email",
       value: profile.socials.email,
       href: profile.socials.email ? `mailto:${profile.socials.email}` : null,
     },
-    { label: "LinkedIn", value: "yubozhao-ai", href: profile.socials.linkedin },
+    {
+      label: "LinkedIn",
+      value: "yubozhao-ai",
+      href: publicHref(profile.socials.linkedin),
+    },
     {
       label: "GitHub",
       value: "View repositories",
-      href: profile.socials.github,
+      href: publicHref(profile.socials.github),
     },
-    { label: "Résumé", value: "View résumé", href: profile.socials.resume },
   ].filter((link) => link.href);
+  const opportunity = [
+    profile.opportunity.status,
+    profile.opportunity.targetRoles.length
+      ? `Focus: ${profile.opportunity.targetRoles.join(" · ")}`
+      : null,
+    profile.opportunity.availability
+      ? `Availability: ${profile.opportunity.availability}`
+      : null,
+  ].filter(Boolean);
   return (
     <section id="contact" className="section-shell contact-section">
       <AnimatedSection>
@@ -253,21 +295,29 @@ export function Contact() {
           <span>06 /</span> BUILD / COLLABORATE / EXPERIMENT
         </div>
         <h2>
-          Let?s build
+          Let’s build
           <br />
           what comes <span>next.</span>
-          <ArrowUpRight aria-hidden="true" />
         </h2>
         <div className="contact-bottom">
-          <p>
-            Have a difficult problem or an idea worth exploring?
-            <br />
-            I?d like to hear about it.
-          </p>
+          <div className="contact-intro">
+            <p>
+              Have a difficult problem or an idea worth exploring?
+              <br />
+              I’d like to hear about it.
+            </p>
+            {opportunity.length > 0 && (
+              <p className="opportunity-note">{opportunity.join(" — ")}</p>
+            )}
+          </div>
           <div className="contact-links">
             {links.map((link) => (
               <a
                 key={link.label}
+                className={
+                  link.label === "Résumé" ? "contact-resume" : undefined
+                }
+                aria-label={link.label === "Résumé" ? "View Résumé" : undefined}
                 href={link.href!}
                 {...(link.href!.startsWith("https://")
                   ? { target: "_blank", rel: "noopener noreferrer" }

@@ -1,5 +1,6 @@
 import { ArrowUpRight, Plus } from "lucide-react";
 import type { Project } from "@/data/profile";
+import { projectEvidence } from "@/data/links";
 import { ProjectVisual } from "./project-visual";
 
 export function ProjectShowcase({
@@ -45,17 +46,18 @@ export function ProjectShowcase({
             ))}
           </ul>
         </details>
-        {project.href && (
+        {projectEvidence(project).map((link) => (
           <a
+            key={link.label}
             className="project-link"
-            href={project.href}
-            {...(project.href.startsWith("https://")
-              ? { target: "_blank", rel: "noopener noreferrer" }
-              : {})}
+            href={link.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`${link.label} for ${project.title}`}
           >
-            Explore project <ArrowUpRight size={16} />
+            {link.label} <ArrowUpRight size={16} aria-hidden="true" />
           </a>
-        )}
+        ))}
       </div>
       <ProjectVisual variant={project.visual} />
     </article>

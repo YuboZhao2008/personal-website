@@ -1,3 +1,6 @@
+.gesture-plane-label {
+  display: none;
+}
 .projects-section {
   border-top: 1px solid var(--border);
 }
@@ -115,6 +118,7 @@
   min-height: 44px;
   gap: 14px;
   margin-top: 15px;
+  margin-right: 20px;
   color: var(--accent);
   font-size: 14px;
 }
@@ -780,7 +784,7 @@
 @media (max-width: 600px) {
   .project-exhibits {
     grid-template-columns: 1fr;
-    gap: 38px;
+    gap: 28px;
   }
   .project-flagship .project-body,
   .project-case-study .project-body {
@@ -844,7 +848,7 @@
   .jarvis-context svg {
     width: 13px;
   }
-  .jarvis-output {
+  .jarvis-output.mono {
     gap: 8px;
     font-size: 8px;
   }
@@ -874,10 +878,10 @@
   .ml-pipeline strong {
     font-size: 12px;
   }
-  .slice-caption {
+  .slice-caption.mono {
     font-size: 8px;
   }
-  .evaluation-lenses {
+  .evaluation-lenses.mono {
     font-size: 9px;
   }
   .project-secondary .project-visual {
@@ -916,10 +920,81 @@
     gap: 7px;
     padding-inline: 9px;
   }
-  .project-secondary .diagram-note {
+  .project-secondary .diagram-note.mono {
     font-size: 9px;
   }
   .section-counter {
     display: none;
+  }
+
+  .project-subtitle {
+    margin-bottom: 16px;
+  }
+  .project-description {
+    margin-bottom: 18px;
+  }
+  .project-details {
+    margin-top: 18px;
+  }
+  .jarvis-visual .visual-topline > span:last-child,
+  .medical-visual .visual-topline > span:last-child,
+  .gesture-svg-label,
+  .jarvis-output.mono .waveform,
+  .context-link {
+    display: none;
+  }
+  .jarvis-inputs .mono,
+  .jarvis-engine > .mono,
+  .jarvis-context > div,
+  .jarvis-output.mono,
+  .diagram-note.mono,
+  .project-secondary .diagram-note.mono,
+  .project-secondary .visual-topline,
+  .slice-caption.mono,
+  .ml-pipeline > div > span,
+  .evaluation-lenses.mono,
+  .gesture-state.mono,
+  .world-branches.mono,
+  .simulation-controls > span {
+    font-size: 12px;
+  }
+  .jarvis-inputs > div {
+    min-width: 0;
+  }
+  .jarvis-context {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .jarvis-output.mono {
+    flex-wrap: wrap;
+  }
+  .ml-pipeline > div {
+    flex-wrap: wrap;
+  }
+  .ml-pipeline strong {
+    font-size: 14px;
+  }
+  .gesture-stage {
+    padding-bottom: 34px;
+  }
+  .gesture-plane-label.mono {
+    display: block;
+    text-align: right;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .visual-controls button {
+    font-size: 12px;
+  }
+  .world-stage {
+    grid-template-columns: 1fr 64px;
+    gap: 14px;
+  }
+  .simulation-controls {
+    flex-wrap: wrap;
+  }
+  .simulation-controls > span {
+    width: 100%;
+    max-width: none;
   }
 }

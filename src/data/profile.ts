@@ -13,6 +13,7 @@ export type Experience = {
 export type Project = {
   id: string;
   title: string;
+  originalTitle?: string;
   subtitle: string;
   category: string;
   description: string;
@@ -21,7 +22,9 @@ export type Project = {
   details: string[];
   technologies: string[];
   evaluation?: { result: string; context: string };
-  href?: string | null;
+  repositoryUrl?: string | null;
+  demoUrl?: string | null;
+  caseStudyUrl?: string | null;
 };
 export type Achievement = {
   id: string;
@@ -30,6 +33,16 @@ export type Achievement = {
   year: number | null;
   result: string;
   detail: string;
+  verificationUrl?: string | null;
+  team?: string | null;
+  teamNumber?: string | null;
+  resultDetail?: string | null;
+  scope?: string | null;
+};
+export type Opportunity = {
+  targetRoles: string[];
+  availability: string | null;
+  status: string | null;
 };
 export type SkillGroup = {
   id: string;
@@ -54,6 +67,12 @@ export const profile = {
     email: "bowenzhao2020@gmail.com" as string | null,
     resume: null as string | null,
   },
+  // Confirm status and availability before displaying a recruiting term or date.
+  opportunity: {
+    targetRoles: ["Software engineering", "AI / machine learning"],
+    availability: null,
+    status: null,
+  } as Opportunity,
   education: {
     degree: "Bachelor of Software Engineering",
     graduation: 2031,
@@ -62,7 +81,7 @@ export const profile = {
   about:
     "I'm a Software Engineering student at the University of Waterloo, working across machine learning, robotics, and intelligent software.",
   philosophy:
-    "From competitive AI and international robotics to quantitative research, I'm interested in what happens when a model becomes part of a larger system — with inputs to interpret, decisions to make, and real constraints to work within.",
+    "I’m interested in building across the boundaries between models, perception, interfaces, and state. My work in competitive AI, robotics, and quantitative research keeps bringing me back to how those parts behave together under real constraints.",
   experiences: [
     {
       id: "ioai",
@@ -73,7 +92,7 @@ export const profile = {
       category: "COMPETITIVE ARTIFICIAL INTELLIGENCE",
       statement: "Selected to represent Team Canada at IOAI 2025.",
       description:
-        "Prepared across machine learning, deep learning, computer vision, NLP, data preparation, and model optimization. Worked on advanced AI problems involving algorithmic reasoning, experimental design, performance evaluation, and optimization under competitive constraints.",
+        "Prepared for IOAI through machine learning, deep learning, computer vision, NLP, and data preparation. Worked on AI problems involving experimental design, model optimization, and performance evaluation under competitive constraints.",
       disciplines: [
         "Machine learning",
         "Computer vision",
@@ -90,7 +109,7 @@ export const profile = {
       category: "INTERNATIONAL ROBOTICS",
       statement: "2nd Place Globally. Built together, under pressure.",
       description:
-        "Collaborated across software, mechanical, electrical, and strategy to develop and optimize a competition robot for autonomous and driver-controlled performance. The work involved iterative engineering, sensor integration, autonomous-control logic, debugging, and performance tuning in a high-pressure international competition environment.",
+        "Worked with teammates across software, mechanical, electrical, and strategy on a competition robot for autonomous and driver-controlled operation. The team’s work involved sensor integration, autonomous-control logic, debugging, and iterative performance tuning for international competition.",
       disciplines: [
         "Autonomous control",
         "Sensor integration",
@@ -107,7 +126,7 @@ export const profile = {
       category: "ML / QUANTITATIVE RESEARCH",
       statement: "Examining the signal. Questioning the model.",
       description:
-        "Supported financial machine-learning workflows through preprocessing, feature engineering, model evaluation, signal validation, and performance benchmarking. Investigated predictive modeling, risk analysis, backtesting, leakage prevention, generalization, and overfitting control.",
+        "Worked on preprocessing, feature engineering, model evaluation, signal validation, and benchmarking for financial machine-learning workflows. Examined predictive modeling, risk analysis, and backtesting, with attention to leakage, generalization, and overfitting.",
       disciplines: [
         "Feature engineering",
         "Backtesting",
@@ -125,11 +144,10 @@ export const profile = {
       presentation: "flagship",
       visual: "intelligence",
       description:
-        "A modular personal AI assistant bringing local LLM inference, speech, persistent memory, external APIs, and real-time computer vision into one system. Voice, text, and camera input meet in a unified multimodal assistant.",
+        "A personal AI assistant that brings voice, text, and camera input into one system for multimodal interaction.",
       details: [
-        "Combines local LLM inference with external APIs through a modular Python system.",
-        "Connects speech-to-text and text-to-speech with text and camera input.",
-        "Integrates persistent memory and real-time computer vision alongside the language model.",
+        "A modular Python system connects Ollama-based local LLM inference with persistent memory and external APIs.",
+        "Speech-to-text and text-to-speech handle voice interaction; OpenCV provides real-time computer vision alongside the language model.",
       ],
       technologies: [
         "Python",
@@ -139,24 +157,29 @@ export const profile = {
         "APIs",
         "LLM integration",
       ],
-      href: null,
+      repositoryUrl: null,
+      demoUrl: null,
+      caseStudyUrl: null,
     },
     {
       id: "brain-tumor",
-      title: "Brain Tumor Detection System",
+      title: "Brain Tumor MRI Classification",
+      originalTitle: "Brain Tumor Detection System",
       subtitle: "Compact model. Careful evaluation.",
       category: "MACHINE LEARNING / MEDICAL IMAGING",
       presentation: "case-study",
       visual: "medical",
       description:
-        "An MRI classification pipeline built with a compact vision-transformer architecture. The experiment goes beyond accuracy to examine precision, recall, F1 score, and the conditions under which a model generalizes.",
+        "An experimental machine-learning project for classifying brain MRI images with a compact vision transformer. The work explores model evaluation and generalization; it is not presented as a clinically validated diagnostic tool.",
       details: [
-        "Developed a Python / PyTorch pipeline using MiniMaxViT for MRI classification.",
+        "Implemented the pipeline in Python and PyTorch using MiniMaxViT.",
         "Experimented with image preprocessing, augmentation, oversampling, class balancing, and validation strategies.",
-        "Evaluated precision, recall, F1 score, and confusion matrices, with attention to generalization and dataset artifacts.",
+        "Evaluation considered precision, recall, F1, confusion matrices, generalization, and dataset artifacts. Metric values are not reported here.",
       ],
       technologies: ["Python", "PyTorch", "MiniMaxViT", "Medical Imaging"],
-      href: null,
+      repositoryUrl: null,
+      demoUrl: null,
+      caseStudyUrl: null,
     },
     {
       id: "gesture",
@@ -166,9 +189,9 @@ export const profile = {
       presentation: "secondary",
       visual: "gesture",
       description:
-        "A real-time drawing interface that turns 21-point hand landmarks into open-hand, closed-hand, and pointing gestures using a Random Forest classifier.",
+        "A real-time drawing interface controlled by open-hand, closed-hand, and pointing gestures, with drawing, erasing, tool switching, and snapshot capture.",
       details: [
-        "Implemented drawing, erasing, tool switching, snapshot capture, and precise pointing coordinates.",
+        "A Random Forest classifier interprets 21-point hand landmarks, with pointing coordinates used for precise interaction.",
         "Used temporal smoothing, gesture-state logic, and latency controls to stabilize real-time interaction.",
       ],
       technologies: ["Python", "OpenCV", "MediaPipe", "scikit-learn"],
@@ -176,7 +199,9 @@ export const profile = {
         result: "≈98%",
         context: "Test accuracy on the project's test split.",
       },
-      href: null,
+      repositoryUrl: null,
+      demoUrl: null,
+      caseStudyUrl: null,
     },
     {
       id: "future-sim",
@@ -186,18 +211,24 @@ export const profile = {
       presentation: "secondary",
       visual: "simulation",
       description:
-        "A configurable simulation framework for world-state representation, environment dynamics, future-state generation, and outcome estimation. An exploration of predictive world-model reasoning.",
+        "A simulation prototype for exploring how a configured world state could evolve and estimating possible outcomes.",
       details: [
-        "Represented configurable world states and environment dynamics in a Python simulation framework.",
-        "Explored future-state generation and outcome estimation as building blocks for predictive world-model reasoning.",
+        "A Python framework represents configurable world states and environment dynamics as the basis for future-state generation.",
       ],
       technologies: ["Python", "NumPy", "Pygame"],
-      href: null,
+      repositoryUrl: null,
+      demoUrl: null,
+      caseStudyUrl: null,
     },
   ] satisfies Project[],
   achievements: [
     {
       id: "ioai",
+      verificationUrl: null,
+      team: null,
+      teamNumber: null,
+      resultDetail: null,
+      scope: null,
       title: "International Olympiad in Artificial Intelligence",
       shortTitle: "IOAI",
       year: 2025,
@@ -206,6 +237,11 @@ export const profile = {
     },
     {
       id: "ftc",
+      verificationUrl: null,
+      team: null,
+      teamNumber: null,
+      resultDetail: null,
+      scope: null,
       title: "FTC World Championship",
       shortTitle: "FTC WORLD",
       year: 2024,
@@ -214,6 +250,11 @@ export const profile = {
     },
     {
       id: "euclid",
+      verificationUrl: null,
+      team: null,
+      teamNumber: null,
+      resultDetail: null,
+      scope: null,
       title: "Euclid Mathematics Contest",
       shortTitle: "EUCLID",
       year: 2026,
@@ -222,6 +263,11 @@ export const profile = {
     },
     {
       id: "csmc",
+      verificationUrl: null,
+      team: null,
+      teamNumber: null,
+      resultDetail: null,
+      scope: null,
       title: "Canadian Senior Mathematics Contest",
       shortTitle: "CSMC",
       year: 2025,
@@ -230,6 +276,11 @@ export const profile = {
     },
     {
       id: "sin",
+      verificationUrl: null,
+      team: null,
+      teamNumber: null,
+      resultDetail: null,
+      scope: null,
       title: "Sir Isaac Newton Physics Contest",
       shortTitle: "SIN PHYSICS",
       year: null,
@@ -292,12 +343,13 @@ export const profile = {
         "REST APIs",
       ],
       additional: [
-        "RAG fundamentals",
+        "TypeScript",
+        "Next.js / React",
         "Speech recognition",
+        "RAG fundamentals",
         "Git",
-        "GitHub",
         "Linux",
-        "VS Code",
+        "GitHub",
       ],
     },
   ] satisfies SkillGroup[],

@@ -2,6 +2,9 @@
 import fs from "node:fs";
 import { createRequire } from "node:module";
 import { chromium } from "playwright-core";
+import { profile, navigation } from "../src/data/profile.ts";
+import { publicHref, projectEvidence } from "../src/data/links.ts";
+import { site } from "../src/data/site.ts";
 
 const require = createRequire(import.meta.url);
 const baseURL = process.env.BASE_URL || "http://127.0.0.1:3000";
@@ -15,6 +18,44 @@ const report = {
 const screenshotStyle =
   ".site-header, .skip-link, nextjs-portal { visibility: hidden !important; }";
 fs.mkdirSync("test-results", { recursive: true });
+
+// Test-only fixtures: these URLs are never included in portfolio content.
+for (const invalid of [
+  null,
+  "",
+  "#",
+  "javascript:alert(1)",
+  "file:///resume.pdf",
+  "C:/private/resume.pdf",
+  "https://user:pass@example.test",
+  "not-a-url",
+]) {
+  assert.equal(publicHref(invalid), null);
+  assert.equal(publicHref(invalid, true), null);
+}
+assert.equal(publicHref("/resume.pdf", true), "/resume.pdf");
+assert.equal(publicHref("//example.test/resume.pdf", true), null);
+assert.equal(
+  publicHref("https://example.test/resume.pdf", true),
+  "https://example.test/resume.pdf",
+);
+assert.deepEqual(projectEvidence({}), []);
+assert.deepEqual(
+  projectEvidence({ repositoryUrl: "#", demoUrl: "javascript:alert(1)" }),
+  [],
+);
+assert.deepEqual(
+  projectEvidence({
+    repositoryUrl: "https://example.test/source",
+    demoUrl: "https://example.test/demo",
+    caseStudyUrl: "https://example.test/study",
+  }),
+  [
+    { label: "Repository", href: "https://example.test/source" },
+    { label: "Demo", href: "https://example.test/demo" },
+    { label: "Case study", href: "https://example.test/study" },
+  ],
+);
 
 function observeErrors(page) {
   page.on("pageerror", (error) => report.consoleErrors.push(error.message));
@@ -62,6 +103,126 @@ async function stableFrames(page) {
       ),
   );
 }
+async function focused(locator) {
+  assert(
+    await locator.evaluate((el) => el === document.activeElement),
+    "Unexpected keyboard focus",
+  );
+  assert(
+    await locator.evaluate(
+      (el) => getComputedStyle(el).outlineStyle !== "none",
+    ),
+    "Keyboard focus is not visibly outlined",
+  );
+}
+async function disclosureAccessibility(page, count, expanded) {
+  // Native summary exposes expanded state in Chromium's accessibility tree;
+  // Playwright's text snapshot currently omits the DisclosureTriangle role.
+  const session = await page.context().newCDPSession(page);
+  try {
+    const { nodes } = await session.send("Accessibility.getFullAXTree");
+    const summaries = nodes.filter(
+      (node) => node.role?.value === "DisclosureTriangle",
+    );
+    assert.equal(summaries.length, count);
+    for (const summary of summaries)
+      assert.equal(
+        summary.properties.find((property) => property.name === "expanded")
+          ?.value.value,
+        expanded,
+      );
+  } finally {
+    await session.detach();
+  }
+}
+
+async function mobileKeyboardNavigation(page, width) {
+  const trigger = page.getByRole("button", {
+    name: "Open navigation",
+    exact: true,
+  });
+  const dialog = page.getByRole("dialog", { name: "Mobile navigation" });
+  await trigger.focus();
+  await page.keyboard.press("Enter");
+  await dialog.waitFor();
+  const links = dialog.getByRole("navigation").getByRole("link");
+  assert.equal(await links.count(), navigation.length);
+  await focused(links.first());
+  // Exact reported regression: opening with Enter followed by forward Tab.
+  for (let i = 1; i < navigation.length; i++) {
+    await page.keyboard.press("Tab");
+    await focused(links.nth(i));
+    assert.equal(await trigger.getAttribute("aria-expanded"), "true");
+  }
+  // Chromium may include browser chrome in a native dialog's Tab cycle.
+  // It must never focus a background page control, and must return to the dialog.
+  for (let i = 0; i < 2; i++) {
+    await page.keyboard.press("Tab");
+    assert(
+      await page.evaluate(
+        () =>
+          !document.querySelector("main").contains(document.activeElement) &&
+          !document.querySelector("header").contains(document.activeElement) &&
+          document.activeElement !== document.querySelector(".skip-link"),
+      ),
+    );
+    if (
+      await dialog
+        .getByRole("button", { name: "Close navigation" })
+        .evaluate((el) => el === document.activeElement)
+    )
+      break;
+  }
+  await focused(dialog.getByRole("button", { name: "Close navigation" }));
+  await page.keyboard.press("Shift+Tab");
+  await focused(links.last());
+  for (let i = navigation.length - 2; i >= 0; i--) {
+    await page.keyboard.press("Shift+Tab");
+    await focused(links.nth(i));
+  }
+  await page.keyboard.press("Shift+Tab");
+  await focused(dialog.getByRole("button", { name: "Close navigation" }));
+  await page.keyboard.press("Tab");
+  await focused(links.first());
+  // Native modality must also block programmatic focus into background content.
+  await page
+    .locator('.hero-actions a[href="#projects"]')
+    .evaluate((el) => el.focus());
+  await focused(links.first());
+  assert(await dialog.evaluate((el) => el.scrollWidth <= el.clientWidth));
+  assert.deepEqual(
+    await accessibility(page),
+    [],
+    "Accessibility failures in open mobile navigation",
+  );
+  if (width === 390)
+    await page.screenshot({ path: "test-results/mobile-menu-390.png" });
+  await page.keyboard.press("Escape");
+  await dialog.waitFor({ state: "hidden" });
+  assert.equal(await trigger.getAttribute("aria-expanded"), "false");
+  await focused(trigger);
+  // Activate every destination with the keyboard, without a mouse/focus shortcut.
+  for (let i = 0; i < navigation.length; i++) {
+    await trigger.focus();
+    await page.keyboard.press(i % 2 ? "Space" : "Enter");
+    await dialog.waitFor();
+    for (let n = 0; n < i; n++) await page.keyboard.press("Tab");
+    await focused(links.nth(i));
+    await page.keyboard.press("Enter");
+    await dialog.waitFor({ state: "hidden" });
+    assert.equal(await trigger.getAttribute("aria-expanded"), "false");
+    assert(
+      await page
+        .locator(navigation[i].href)
+        .evaluate((el) => el === document.activeElement),
+    );
+  }
+  // Mouse opening/closing remains supported.
+  await trigger.click();
+  await dialog.getByRole("button", { name: "Close navigation" }).click();
+  await dialog.waitFor({ state: "hidden" });
+  assert(await trigger.evaluate((el) => el === document.activeElement));
+}
 async function accessibility(page) {
   await page.addScriptTag({ path: require.resolve("axe-core/axe.min.js") });
   return page.evaluate(async () => {
@@ -106,8 +267,54 @@ try {
     assert.equal(response.status(), 200);
     assert.equal(await page.locator("h1").count(), 1);
     assert.equal(await page.locator("main > section").count(), 7);
-    assert.equal(await page.locator(".project-showcase").count(), 4);
+    assert.equal(
+      await page.locator(".project-showcase").count(),
+      profile.projects.length,
+    );
     await noOverflow(page, width + "px initial");
+    const visibleText = await page.locator("body").innerText();
+    assert(
+      !/[A-Za-z]\?[A-Za-z]|\uFFFD|Ã.|Â.|â€/.test(visibleText),
+      "Corrupted visible punctuation",
+    );
+    assert.equal(
+      await page.getByRole("heading", { name: /Let’s build/ }).count(),
+      1,
+    );
+    assert(visibleText.includes("I’d like to hear about it."));
+    const accessibleText = await page.locator("main").ariaSnapshot();
+    assert(
+      !/Let\?s|I\?d|\uFFFD/.test(accessibleText),
+      "Corrupted accessible text",
+    );
+    for (const diagram of await page
+      .locator(".project-visual svg, .field-svg, .world-grid")
+      .all()) {
+      assert(
+        await diagram.evaluate((el) => {
+          const r = el.getBoundingClientRect();
+          const p = el
+            .closest(".project-visual, .system-visual")
+            .getBoundingClientRect();
+          return (
+            r.width === 0 || (r.left >= p.left - 1 && r.right <= p.right + 1)
+          );
+        }),
+        "Diagram extends outside its container",
+      );
+    }
+    if (width <= 600) {
+      const labels = page.locator(
+        ".visual-topline, .jarvis-inputs .mono, .jarvis-engine > .mono, .jarvis-context > div, .jarvis-output, .slice-caption, .ml-pipeline strong, .evaluation-lenses, .gesture-state, .gesture-plane-label, .world-branches, .simulation-controls > span, .motion-control",
+      );
+      for (const label of await labels.all())
+        assert(
+          await label.evaluate(
+            (el) => parseFloat(getComputedStyle(el).fontSize) >= 12,
+          ),
+          "Essential mobile label is too small",
+        );
+    }
 
     // Real keyboard activation, including skip-link focus transfer.
     await page.keyboard.press("Tab");
@@ -120,22 +327,16 @@ try {
     );
 
     if (width <= 600) {
-      const toggle = page.getByRole("button", { name: "Open navigation" });
-      await toggle.click();
-      await page.keyboard.press("Escape");
-      assert.equal(await toggle.getAttribute("aria-expanded"), "false");
-      assert(await toggle.evaluate((el) => el === document.activeElement));
-      await toggle.click();
-      await page
-        .getByRole("navigation")
-        .getByRole("link", { name: "Projects", exact: true })
-        .click();
-      assert.equal(await toggle.getAttribute("aria-expanded"), "false");
-      assert(
-        await page
-          .locator("#projects")
-          .evaluate((el) => el === document.activeElement),
-      );
+      await mobileKeyboardNavigation(page, width);
+    } else {
+      const desktopLinks = page
+        .getByRole("navigation", { name: "Main navigation" })
+        .getByRole("link");
+      await desktopLinks.first().focus();
+      for (let i = 0; i < navigation.length; i++) {
+        await focused(desktopLinks.nth(i));
+        if (i < navigation.length - 1) await page.keyboard.press("Tab");
+      }
     }
     // Every visualization control works without a mouse.
     for (const name of ["Vision / ML", "Robotics", "Worlds", "Agents"]) {
@@ -190,6 +391,7 @@ try {
         "Disclosure failed with Enter",
       );
     }
+    await disclosureAccessibility(page, await disclosures.count(), true);
     await noOverflow(page, width + "px expanded");
     if ([320, 768, 1440].includes(width)) {
       const violations = await accessibility(page);
@@ -204,6 +406,7 @@ try {
     }
     for (let i = 0; i < (await disclosures.count()); i++)
       await disclosures.nth(i).locator("summary").click();
+    await disclosureAccessibility(page, await disclosures.count(), false);
     await page.evaluate(() => scrollTo(0, 0));
     await stableFrames(page);
     await page.waitForFunction(
@@ -243,6 +446,9 @@ try {
     }
     report.viewports.push({
       width,
+      pageHeight: await page.evaluate(
+        () => document.documentElement.scrollHeight,
+      ),
       overflow: false,
       cls,
       keyboard: "pass",
@@ -346,15 +552,57 @@ try {
       );
     if (link.target === "_blank")
       assert(link.rel.includes("noopener") && link.rel.includes("noreferrer"));
+    if (!link.href.startsWith("#") && !link.href.startsWith("mailto:"))
+      assert.equal(
+        publicHref(link.href, true),
+        link.href,
+        "Invalid configured destination",
+      );
   }
-  assert(links.some((l) => l.href === "mailto:bowenzhao2020@gmail.com"));
-  assert(links.some((l) => l.href === "https://linkedin.com/in/yubozhao-ai"));
-  assert.equal(
-    await page
-      .locator('a[href*="github.com"], a[href*="resume.pdf"], a[href^="tel:"]')
-      .count(),
-    0,
-  );
+  if (profile.socials.email)
+    assert(links.some((l) => l.href === `mailto:${profile.socials.email}`));
+  for (const key of ["linkedin", "github"]) {
+    const href = publicHref(profile.socials[key]);
+    if (href) assert(links.some((link) => link.href === href));
+    else if (key === "github")
+      assert.equal(
+        await page
+          .locator(".contact-links")
+          .getByRole("link", { name: /GitHub/ })
+          .count(),
+        0,
+      );
+  }
+  const resumeLinks = page.getByRole("link", {
+    name: "View Résumé",
+    exact: true,
+  });
+  const resume = publicHref(profile.socials.resume, true);
+  assert.equal(await resumeLinks.count(), resume ? 2 : 0);
+  for (const link of await resumeLinks.all())
+    assert.equal(await link.getAttribute("href"), resume);
+  for (const project of profile.projects) {
+    const evidence = page.locator(`#project-${project.id} .project-link`);
+    const expected = projectEvidence(project);
+    assert.equal(await evidence.count(), expected.length);
+    for (let i = 0; i < expected.length; i++)
+      assert.equal(
+        await evidence.nth(i).getAttribute("href"),
+        expected[i].href,
+      );
+  }
+  for (const achievement of profile.achievements) {
+    const evidence = page.locator(
+      `.honour-${achievement.id} .achievement-verification`,
+    );
+    const href = publicHref(achievement.verificationUrl);
+    assert.equal(await evidence.count(), href ? 1 : 0);
+    if (href) assert.equal(await evidence.getAttribute("href"), href);
+  }
+  const opportunityText = await page.locator("#contact").innerText();
+  if (profile.opportunity.availability)
+    assert(opportunityText.includes(profile.opportunity.availability));
+  else assert(!opportunityText.includes("Availability:"));
   assert.equal(
     await page
       .locator('a[aria-disabled="true"], [role="link"][aria-disabled="true"]')
@@ -367,6 +615,27 @@ try {
   );
   assert.equal(await page.locator('meta[property="og:title"]').count(), 1);
   assert.equal(await page.locator('meta[name="twitter:card"]').count(), 1);
+  const canonical = page.locator('link[rel="canonical"]');
+  const ogUrl = page.locator('meta[property="og:url"]');
+  const ogImage = page.locator('meta[property="og:image"]');
+  if (site.url) {
+    assert.equal(
+      new URL(await canonical.getAttribute("href")).href,
+      `${site.url}/`,
+    );
+    assert.equal(
+      new URL(await ogUrl.getAttribute("content")).href,
+      `${site.url}/`,
+    );
+    assert.equal(
+      await ogImage.getAttribute("content"),
+      `${site.url}/share-image`,
+    );
+  } else {
+    assert.equal(await canonical.count(), 0);
+    assert.equal(await ogUrl.count(), 0);
+    assert.equal(await ogImage.count(), 0);
+  }
   assert(
     (await page.locator(".project-evaluation").textContent()).includes(
       "project's test split",
@@ -387,8 +656,17 @@ try {
       assert.equal(body.readUInt32BE(20), 630);
       fs.writeFileSync("test-results/share-image.png", body);
     }
-    if (path === "/sitemap.xml")
-      assert(!(await res.text()).includes("localhost"));
+    if (path === "/sitemap.xml") {
+      const xml = await res.text();
+      assert(!(xml.includes("localhost") || xml.includes("127.0.0.1")));
+      if (site.url) assert(xml.includes(`<loc>${site.url}</loc>`));
+      else assert(!xml.includes("<loc>"));
+    }
+    if (path === "/robots.txt") {
+      const robots = await res.text();
+      if (site.url) assert(robots.includes(`Sitemap: ${site.url}/sitemap.xml`));
+      else assert(!robots.includes("Sitemap:"));
+    }
   }
   report.checks.push(
     "normal motion, pause/resume, preference changes, offscreen pause, hover, all local links, metadata, PNG sharing image, absent optional URLs",
@@ -431,6 +709,7 @@ try {
   );
   report.checks.push(
     "touch navigation, gesture selection, state stepping, resize closes mobile menu",
+    "reviewer regression: mobile keyboard opening, forward/reverse Tab, Escape, focus return, all destinations, punctuation, diagram bounds and label sizes, optional links, production origin",
   );
 
   const noJS = await browser.newPage({
@@ -439,7 +718,10 @@ try {
     reducedMotion: "reduce",
   });
   await noJS.goto(baseURL);
-  assert.equal(await noJS.locator(".project-showcase").count(), 4);
+  assert.equal(
+    await noJS.locator(".project-showcase").count(),
+    profile.projects.length,
+  );
   await noJS.locator(".project-details").first().locator("summary").click();
   assert(
     await noJS

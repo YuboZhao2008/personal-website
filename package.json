@@ -1,5 +1,6 @@
 {
   "name": "yubo-portfolio",
+  "type": "module",
   "description": "Yubo Zhao's engineering portfolio, built with Next.js, React, and TypeScript.",
   "version": "0.1.0",
   "private": true,

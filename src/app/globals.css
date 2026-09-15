@@ -260,7 +260,7 @@ html[data-motion="paused"] *::after {
     width: calc(100% - 40px);
   }
   .section-space {
-    padding-block: 72px;
+    padding-block: 52px;
   }
   h2 {
     font-size: 40px;

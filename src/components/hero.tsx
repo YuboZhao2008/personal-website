@@ -1,5 +1,6 @@
 import { ArrowDown, ArrowUpRight } from "lucide-react";
 import { profile } from "@/data/profile";
+import { publicHref } from "@/data/links";
 import { AnimatedSection } from "./animated-section";
 import { Button } from "./ui";
 import { SystemVisual } from "./system-visual";
@@ -35,6 +36,9 @@ export function Hero() {
             <div className="hero-actions">
               <Button href="#projects" variant="primary">
                 Explore the systems <ArrowDown size={16} />
+              </Button>
+              <Button href={publicHref(profile.socials.resume, true)}>
+                View Résumé <ArrowUpRight size={16} aria-hidden="true" />
               </Button>
               <Button href="#contact" variant="text">
                 Get in touch <ArrowUpRight size={16} />

@@ -160,6 +160,7 @@ function GestureVisual() {
             DRAWING PLANE
           </text>
         </svg>
+        <span className="gesture-plane-label mono">Drawing plane</span>
         <span className="gesture-state mono" aria-live="polite">
           CLASS / {states[gesture].toUpperCase()}
         </span>
