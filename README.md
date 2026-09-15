@@ -1,151 +1,131 @@
-﻿# Yubo Zhao — Engineering & Intelligent Systems
+# Yubo Zhao — Personal Portfolio
 
-A personal portfolio for Yubo Zhao, a University of Waterloo Software Engineering student building across AI, machine learning, computer vision, robotics, and experimental software. Phase 4 uses a charcoal-and-lime identity, editorial competition spreads, custom interactive system diagrams, a contrasting ML case study, and typographic honours.
+An engineering portfolio showcasing work across software engineering, AI / machine learning, computer vision, robotics, and intelligent systems.
 
-## Stack
+[Live website](#live-website-and-public-origin) · [Architecture](#architecture) · [Run locally](#local-development) · [LinkedIn](https://linkedin.com/in/yubozhao-ai)
 
-Next.js 16 App Router, React 19, TypeScript, Tailwind CSS 4 with authored CSS, and Lucide icons. Motion uses CSS and IntersectionObserver; there is no animation framework, WebGL, or canvas runtime. Typography uses local Arial/Helvetica and Consolas fallbacks, with no font downloads.
+<!-- LIVE_WEBSITE: Replace the Live website link target above with the verified production URL once available. -->
 
-Development checks use ESLint, TypeScript, Playwright Core, and axe-core. Use Node.js 22 or newer (validated with Node 24).
+![Desktop view of Yubo Zhao's portfolio, with charcoal and lime typography, an interactive computational surface, and engineering highlights](docs/images/portfolio-desktop.png)
 
-## Installation and development
+## Overview
+
+Yubo Zhao's personal portfolio brings together projects, engineering experience, competition achievements, and technical skills as a Software Engineering student at the University of Waterloo. A single-page layout pairs project descriptions and engineering notes with custom SVG and CSS visualizations.
+
+## Tech Stack
+
+| Area | Technologies |
+| --- | --- |
+| Framework | Next.js 16 App Router, React 19 |
+| Language | TypeScript with strict checking |
+| Styling | Tailwind CSS 4, authored CSS, Lucide icons |
+| Interaction and motion | React state, CSS animations, IntersectionObserver |
+| Validation | ESLint, TypeScript, Playwright Core, axe-core |
+
+## Highlights
+
+- **Responsive layouts:** custom desktop and mobile compositions, with navigation that handles keyboard focus, Escape, and viewport changes.
+- **Interactive technical illustrations:** a computational surface, multimodal architecture diagram, gesture landmark selector, and deterministic world-state controls. These illustrate the featured work; they do not run its AI models or process camera input.
+- **Motion controls:** support for `prefers-reduced-motion`, an ambient animation pause/resume control, and offscreen animation pausing.
+- **Content available without JavaScript:** prerendered portfolio content and native HTML disclosures for project notes and additional skills.
+- **Structured content:** typed project records select their presentation and visualization, while shared components render experience, achievements, and skills.
+- **Search and sharing metadata:** a generated 1200 × 630 sharing image, plus canonical and sitemap URLs derived from an optional configured origin.
+
+## Architecture
+
+```text
+src/
+├── app/          Page composition, layout, global CSS, metadata routes
+├── components/   Sections, navigation, project displays, interactive diagrams
+├── data/         Typed portfolio content and site configuration
+└── styles/       Styles for navigation, hero, projects, and other sections
+scripts/
+└── check-browser.mjs   Browser and accessibility validation
+docs/
+└── images/       Curated README screenshots
+```
+
+[`src/app/page.tsx`](src/app/page.tsx) composes the page from reusable sections. Server Components render the content, with Client Components handling navigation, diagram state, and motion. The home page, crawler metadata, and sharing image are prerendered during the production build.
+
+## Local Development
+
+Use **Node.js 24** and npm, matching the validated development runtime. From the cloned repository:
 
 ```sh
 npm ci
 npm run dev
 ```
 
-Open http://localhost:3000. On Windows with PowerShell script execution disabled, use `npm.cmd` instead of `npm`.
+Open [localhost:3000](http://localhost:3000). `npm ci` installs the versions recorded in the lockfile. On Windows, use `npm.cmd` if PowerShell blocks `npm.ps1`.
 
-No environment variables are required to run the site. Copy `.env.example` to `.env.local` only when configuring `SITE_URL` for local metadata testing; never commit local environment files.
+No environment variables or API credentials are required. For local metadata testing, copy [`.env.example`](.env.example) to `.env.local` and set the optional `SITE_URL`.
 
-## Production
+## Production Build
+
+```sh
+npm run build
+npm start
+```
+
+The production server uses [localhost:3000](http://localhost:3000). Stop any development server using that port first.
+
+## Validation
 
 ```sh
 npm run typecheck
 npm run lint
 npm run build
-npm start
 ```
 
-The portfolio, robots, sitemap, favicon, and sharing image are prerendered. Stop the development server before validating the production server on the same port.
+Type-checking generates Next.js route declarations before running TypeScript, so it also works before the first development server or build.
 
-## Structure
-
-```text
-src/
-  app/
-    page.tsx                 Page order
-    layout.tsx               Document, metadata, skip link
-    globals.css              Tokens, type, shared controls, motion preferences
-    icon.svg                 Vector favicon
-    robots.ts / sitemap.ts   Domain-aware crawler metadata
-    share-image/route.tsx     Prerendered 1200 × 630 sharing image
-  data/
-    profile.ts               All résumé content, projects, skills, links
-    site.ts                  Public origin and SEO title/description
-  components/
-    navbar.tsx               Responsive navigation and focus management
-    hero.tsx                 Identity and competition credentials
-    system-visual.tsx        Interactive computational field
-    motion-control.tsx       Ambient animation pause/resume
-    content-sections.tsx     Profile, experience, projects, honours, skills, contact
-    project-card.tsx         ProjectShowcase: flagship, case study, secondary
-    jarvis-visual.tsx         Multimodal architecture
-    project-visual.tsx        MRI, gesture, and world-state visualizations
-    animated-section.tsx     Visible-on-server reveals and offscreen motion pause
-    ui.tsx / footer.tsx       Shared presentation
-  styles/
-    navigation.css / hero.css / projects.css / sections.css
-scripts/
-  check-browser.mjs          Responsive, interaction, accessibility, production checks
-```
-
-## Profile content
-
-Edit `src/data/profile.ts` for education, experience, honours, technologies, and project descriptions. Unknown facts stay absent: no IOAI ranking, internship performance claim, or invented medical metric is included. The gesture accuracy is explicitly scoped to the project's test split. The physics contest year is unset.
-
-The page flows from Waterloo and competition credentials through IOAI, FTC, and quantitative research into the project exhibits. The old explorations section is folded into the focused project narrative.
-
-Skills have three immediately visible entries per group and native keyboard/touch disclosures for the rest. Foundational skills retain their qualifications, including RAG, IMU, and sensor fusion.
-
-## Defining and adding projects
-
-Projects are typed records in `profile.projects`. Each has:
-
-- `id`: unique stable slug, also used in `#project-<id>` anchors.
-- `title`, `subtitle`, `category`, and `description`.
-- `presentation`: `flagship`, `case-study`, or `secondary`; layout is explicit, independent of array position.
-- `visual`: `intelligence`, `medical`, `gesture`, or `simulation`.
-- `details`: engineering notes shown in a native disclosure.
-- `technologies`: concise list of verified tools.
-- Optional `evaluation` with a result and its measurement context.
-- Optional `href` for a verified repository or demo.
-
-Add a record to the array to render a new project. For a new visualization, extend the `Project["visual"]` union and `ProjectVisual` renderer, then add scoped styles in `projects.css`. Update the four-project count in the browser test when intentionally adding projects.
-
-The visuals are architectural or illustrative studies, not product screenshots, patient data, live inference, or measured simulation outputs. Hero selectors link to the matching project or experience. Gesture selection shows 21-point landmark poses; world-state controls step and reset a deterministic illustration. No camera or microphone access is requested.
-
-## Links and résumé
-
-Configure `profile.socials` in `src/data/profile.ts`:
-
-- Email: `bowenzhao2020@gmail.com` (store without `mailto:`).
-- LinkedIn: `https://linkedin.com/in/yubozhao-ai`.
-- GitHub: currently `null`.
-- Résumé: currently `null`.
-
-To add a résumé, create `public/resume.pdf` and set `resume: "/resume.pdf"`, or use a verified HTTPS URL. To add project destinations, set each project's `href`. Missing optional links are omitted, including their controls. No phone number is displayed.
-
-## GitHub → Vercel deployment
-
-Use a **public** GitHub repository for this portfolio. Create an empty repository without initializing a README, license, or gitignore, so its history does not conflict with this existing repository. The local branch at deployment preparation is `master`, with no remote configured. Review the changes and commit them, then connect your repository:
-
-```sh
-git add .gitignore README.md
-git commit -m "Prepare GitHub and Vercel deployment"
-git branch -m main
-git remote add origin "<MY-GITHUB-REPO-URL>"
-git push -u origin main
-```
-
-Replace the URL placeholder with the clone URL of the repository you created. The branch rename preserves every existing commit; no force push is needed. Public Git history includes commit author/committer metadata as well as files, so review the existing identity locally before publishing. For future commits, use an identity associated with your GitHub account, including its GitHub-provided no-reply email if preferred.
-
-In Vercel, choose **Add New → Project**, connect GitHub, grant access to this repository, and import it. Use your personal **Hobby** plan and these settings:
-
-- Framework preset: **Next.js**; root directory: repository root (`./`).
-- Node.js: **24.x**, matching the validated local runtime.
-- Build command: detected `npm run build`; output directory: leave the Next.js default.
-- Install command: `npm ci` to install the committed lockfile exactly.
-- Environment variables: none required for the first deployment.
-
-Click **Deploy** and use the generated HTTPS `.vercel.app` production address. No custom domain, `vercel.json`, local server, or machine-specific filesystem is required. The site runs on Vercel even when your computer is off.
-
-Under **Settings → Environments → Production → Branch Tracking**, confirm `main`. Pushes/merges to `main` deploy to production; other branches and pull requests create Preview Deployments. Review previews before merging approved changes into `main`. Preview URLs are separate from the stable production address. See [Vercel Git integration](https://vercel.com/docs/git) for the standard workflow.
-
-## Public URL and environment configuration
-
-`src/data/site.ts` holds the SEO configuration. The only application variable is optional `SITE_URL`. After the first deployment, open **Project Settings → Environment Variables**, add it for **Production** using the actual stable Vercel production origin (including HTTPS, with no path/query/fragment), then redeploy. Do not use a temporary preview URL. Keep it unset in Preview, or use the same production origin there if canonical metadata is desired.
-
-It enables canonical, OpenGraph URL/image, Twitter large-image metadata, and the sitemap entry. Without it, the site still works, descriptive metadata remains, `/sitemap.xml` contains no guessed URL, and `/robots.txt` omits its sitemap line. `/share-image` remains available. Environment changes require a new build because these routes are prerendered. No API credentials are needed; `BASE_URL` and `BROWSER_PATH` are local browser-test options and are not Vercel application variables.
-
-When you choose a custom domain later, add it in **Project Settings → Domains**, follow Vercel's DNS instructions, make it the primary production domain, update `SITE_URL`, and redeploy. No domain is purchased or configured by this setup.
-
-## Browser and accessibility checks
-
-With a development or production server running:
+With a development or production server running, use a second terminal for browser validation:
 
 ```sh
 npm run test:browser
 ```
 
-Environment options:
+The suite checks nine viewport widths from 320 to 1920 pixels, horizontal overflow, keyboard and touch interactions, navigation, disclosures, motion preferences, local links, metadata, browser errors, and content without JavaScript. axe-core scans representative mobile, tablet, and desktop widths for WCAG A/AA rule violations.
 
-- `BASE_URL`: defaults to `http://127.0.0.1:3000`.
-- `BROWSER_PATH`: defaults to installed Chrome on Windows. Set the path to another installed Chromium browser on other operating systems. Playwright Core does not download a browser.
+| Browser test option | Default / usage |
+| --- | --- |
+| `BASE_URL` | `http://127.0.0.1:3000`; override to test another local port |
+| `BROWSER_PATH` | Standard Windows Chrome installation; set an absolute path to an installed Chrome or Chromium executable on other systems |
 
-Tests cover 320, 375, 390, 430, 768, 1024, 1280, 1440, and 1920px; initial and expanded horizontal overflow; keyboard skip links/disclosures/diagram controls; mobile menu focus and Escape; touch interactions; hover; normal/reduced/paused motion; offscreen animation pause; console/network errors; layout shift; internal links; absent optional URLs; metadata; generated image dimensions; and content without JavaScript. axe-core checks WCAG A/AA rules at representative narrow, tablet, and desktop widths.
+Playwright Core uses an existing browser and does not download one. Test screenshots and reports are written to ignored `test-results/`. The [README screenshot](docs/images/portfolio-desktop.png) is a curated copy of `test-results/hero-1440.png`; after a visual change, run the suite against a production build, review that capture, and copy it to `docs/images/portfolio-desktop.png`.
 
-Screenshots and the structured report go to ignored `test-results/`. External social destinations are checked against the configured values; the suite does not send email or require third-party sites to accept automated requests.
+## Content Management
 
-Ambient motion can be paused in the hero and is disabled for reduced motion. Content is visible without JavaScript; project and skill disclosures use native HTML. User-selected controls change only illustrations. No scroll hijacking, custom cursor, heavy parallax, video, particle effects, or remote image/font requests are used.
+Edit [`src/data/profile.ts`](src/data/profile.ts) for profile information, education, projects, experience, achievements, skills, navigation links, and social destinations. Edit [`src/data/site.ts`](src/data/site.ts) for the site title, description, and origin handling.
+
+Each project includes an ID, description, technologies, engineering notes, a `presentation` (`flagship`, `case-study`, or `secondary`), and a `visual` (`intelligence`, `medical`, `gesture`, or `simulation`). Optional `evaluation` data includes measurement context; optional `href` values link to a repository or demo. Leave unknown optional links `null` so their controls stay hidden.
+
+When changing the number of projects, update the section introduction and counter in `src/components/content-sections.tsx` and the browser suite's project-count assertions. Adding a new visualization also requires extending the `Project` type and `ProjectVisual` renderer. Shared section copy lives in the components.
+
+## Deployment
+
+The project is prepared for Vercel's [Next.js integration](https://vercel.com/docs/frameworks/full-stack/nextjs). Import the GitHub repository using these settings:
+
+| Setting | Value |
+| --- | --- |
+| Framework preset | Next.js |
+| Root directory | Repository root (`./`) |
+| Node.js | 24.x |
+| Install command | `npm ci` |
+| Build command | `npm run build` |
+| Output directory | Next.js default |
+| Production branch | `main` |
+
+The intended workflow tracks `main` for production and uses previews for branch changes through [Vercel's Git integration](https://vercel.com/docs/git). Confirm the production branch in the Vercel project settings.
+
+### Live website and public origin
+
+The production address will be linked at the top of this README once it is confirmed.
+
+After the stable production URL is available:
+
+1. Add a **Live Website** link to the README navigation and the same URL to GitHub's **About → Website** field.
+2. Set `SITE_URL` in Vercel's **Production** environment to that HTTPS origin, with no path, query, fragment, or credentials. Use the stable production address rather than a preview deployment URL.
+3. Create a new production build to apply the metadata configuration. [Vercel environment variables](https://vercel.com/docs/environment-variables) are scoped to deployment environments.
+
+`SITE_URL` is optional. When unset, the site still runs, `/share-image` remains available, and canonical URLs, absolute sharing-image metadata, and the sitemap entry are omitted. Set it before building to enable those URLs. Keep it unset in Preview unless previews should use the production canonical origin. If the primary domain changes later, update `SITE_URL` and both public links, then rebuild.

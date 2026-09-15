@@ -1,9 +1,10 @@
 node_modules/
 .next/
 out/
+next-env.d.ts
 *.tsbuildinfo
 
-# Local environment files; keep the empty configuration template.
+# Local environment files; keep the safe configuration template.
 .env*
 !.env.example
 
