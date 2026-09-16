@@ -1,14 +1,16 @@
 # Yubo Zhao — Personal Portfolio
 
-An engineering portfolio showcasing work across software engineering, AI / machine learning, computer vision, robotics, and intelligent systems.
+An engineering portfolio showcasing work across software engineering, AI / machine learning, reinforcement learning, computer vision, robotics, and intelligent systems.
 
-[Live Website](https://personal-website-one-pi-86.vercel.app) · [Architecture](#architecture) · [Run locally](#local-development) · [LinkedIn](https://linkedin.com/in/yubozhao-ai)
+[Live Website](https://personal-website-one-pi-86.vercel.app) · [Architecture](#architecture) · [Run locally](#local-development) · [GitHub](https://github.com/YuboZhao2008) · [Résumé](https://personal-website-one-pi-86.vercel.app/resume.pdf)
 
-![Desktop view of Yubo Zhao's portfolio, with charcoal and lime typography, an interactive computational surface, and engineering highlights](docs/images/portfolio-desktop.png)
+![Current portfolio homepage with charcoal and lime typography, a computational surface, résumé access, and engineering highlights](docs/images/portfolio-homepage.png)
 
 ## Overview
 
 Yubo Zhao's personal portfolio brings together projects, engineering experience, competition achievements, and technical skills as a Software Engineering student at the University of Waterloo. A single-page layout pairs project descriptions and engineering notes with custom SVG and CSS visualizations.
+
+Featured work includes Jarvis, the Warcraft III Reinforcement Learning Agent, Brain Tumor MRI Classification, Gesture-Controlled Drawing Interface, and Future-Sim. The Warcraft project focuses on the environment and control infrastructure for real-time RTS reinforcement learning; learned policies are still in development.
 
 ## Tech Stack
 
@@ -26,7 +28,8 @@ Yubo Zhao's personal portfolio brings together projects, engineering experience,
 - **Interactive technical illustrations:** a computational surface, multimodal architecture diagram, Warcraft observation–policy–action loop, gesture landmark selector, and deterministic world-state controls. These illustrate the featured work; they do not run its AI models or process camera input.
 - **Motion controls:** support for `prefers-reduced-motion`, an ambient animation pause/resume control, and offscreen animation pausing.
 - **Content available without JavaScript:** prerendered portfolio content and native HTML disclosures for project notes and additional skills.
-- **Structured content:** typed project records select their presentation and visualization, while shared components render experience, achievements, and skills.
+- **Structured content:** centralized profile data and typed project records select their presentation and visualization, while shared components render experience, achievements, and skills.
+- **Public evidence and résumé:** project links render only when configured with valid HTTPS destinations; the public résumé PDF is linked from the hero and contact section.
 - **Search and sharing metadata:** a generated 1200 × 630 sharing image, plus canonical and sitemap URLs derived from an optional configured origin.
 
 ## Architecture
@@ -89,10 +92,10 @@ The suite checks eleven viewport widths from 320 to 1920 pixels, horizontal over
 
 | Browser test option | Default / usage                                                                                                           |
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `BASE_URL`          | `http://127.0.0.1:3000`; override to test another local port                                                              |
+| `BASE_URL`          | `http://127.0.0.1:3000`; override to test another local port or the deployed site                                         |
 | `BROWSER_PATH`      | Standard Windows Chrome installation; set an absolute path to an installed Chrome or Chromium executable on other systems |
 
-Playwright Core uses an existing browser and does not download one. Test screenshots and reports are written to ignored `test-results/`. The [README screenshot](docs/images/portfolio-desktop.png) is a curated copy of `test-results/hero-1440.png`; after a visual change, run the suite against a production build, review that capture, and copy it to `docs/images/portfolio-desktop.png`.
+Playwright Core uses an existing browser and does not download one. Test screenshots and reports are written to ignored `test-results/`. The [README screenshot](docs/images/portfolio-homepage.png) was captured directly from the live production homepage at 1440 × 1000 with reduced motion and no browser chrome. To refresh it with the suite, set `BASE_URL` and `SITE_URL` to the live production origin, run `npm run test:browser`, review `test-results/hero-1440.png`, and copy it to `docs/images/portfolio-homepage.png`.
 
 ## Content Management
 
@@ -115,24 +118,8 @@ Keep unknown values `null` (or an empty `targetRoles` array). Evidence URLs are 
 
 ## Deployment
 
-The project is prepared for Vercel's [Next.js integration](https://vercel.com/docs/frameworks/full-stack/nextjs). Import the GitHub repository using these settings:
+The site runs on Vercel with `main` as the production branch. Pushes to `main` trigger production deployments through [Vercel's Git integration](https://vercel.com/docs/git); branch changes use preview deployments. The project uses the repository root, Node.js 24.x, `npm ci`, `npm run build`, and the default [Next.js settings](https://vercel.com/docs/frameworks/full-stack/nextjs).
 
-| Setting           | Value                  |
-| ----------------- | ---------------------- |
-| Framework preset  | Next.js                |
-| Root directory    | Repository root (`./`) |
-| Node.js           | 24.x                   |
-| Install command   | `npm ci`               |
-| Build command     | `npm run build`        |
-| Output directory  | Next.js default        |
-| Production branch | `main`                 |
+`SITE_URL` is configured in Vercel's Production environment as `https://personal-website-one-pi-86.vercel.app`. It supplies canonical, sitemap, and sharing-image URLs at build time. It remains optional locally: when unset, those absolute URLs are omitted while the site and `/share-image` still work. Keep it unset in Preview unless previews should use the production canonical origin.
 
-The intended workflow tracks `main` for production and uses previews for branch changes through [Vercel's Git integration](https://vercel.com/docs/git). Confirm the production branch in the Vercel project settings.
-
-### Live website and public origin
-
-The live site is linked at the top of this README. Production metadata consumes the existing `SITE_URL` environment variable at build time; the domain is not hardcoded in application components. Keep it set to the stable production HTTPS origin in Vercel's Production environment.
-
-After changing the primary domain, update the README link, GitHub's **About → Website** field, and production `SITE_URL`, then create a new build to apply metadata changes.
-
-`SITE_URL` is optional. When unset, the site still runs, `/share-image` remains available, and canonical URLs, absolute sharing-image metadata, and the sitemap entry are omitted. Set it before building to enable those URLs. Keep it unset in Preview unless previews should use the production canonical origin. If the primary domain changes later, update `SITE_URL` and both public links, then rebuild.
+A custom domain can be added later. When changing the primary domain, update production `SITE_URL`, the public website and résumé links in this README, and GitHub's **About → Website** field, then rebuild to apply the metadata change.
