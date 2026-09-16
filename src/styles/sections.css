@@ -160,17 +160,26 @@
   letter-spacing: -0.065em;
   display: block;
 }
-.ftc-result sup {
-  font-size: 40px;
-  top: -1.2em;
-  margin-left: 8px;
-}
 .ftc-result > .world-label {
   display: block;
-  font-size: 22px;
+  font-size: 16px;
+  line-height: 1.5;
+  max-width: 28ch;
   color: var(--ink);
-  letter-spacing: 0.16em;
+  letter-spacing: 0.08em;
   margin-top: 14px;
+}
+.experience-ftc .experience-year > span:first-child {
+  font-size: 14px;
+  line-height: 1.5;
+  letter-spacing: 0;
+  max-width: 14ch;
+}
+.experience-copy > .experience-result-detail {
+  color: var(--accent);
+  font-size: 18px;
+  line-height: 1.5;
+  margin-bottom: 18px;
 }
 .experience-ftc .experience-copy {
   padding-top: 15px;
@@ -235,18 +244,23 @@
 }
 .honours-grid {
   display: grid;
-  grid-template-columns: 1.15fr 0.85fr 1fr 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px 0;
 }
 .honours-grid > div {
   border-left: 1px solid #607e3a65;
   padding: 0 23px;
 }
-.honours-grid > div:first-child {
+.honours-grid > div:nth-child(3n + 1) {
   border-left: 0;
   padding-left: 0;
 }
-.honours-grid > div:last-child {
+.honours-grid > div:nth-child(3n) {
   padding-right: 0;
+}
+.honours-grid > div:nth-child(-n + 3) {
+  padding-bottom: 26px;
+  border-bottom: 1px solid #607e3a65;
 }
 .honour-label {
   display: flex;
@@ -269,8 +283,21 @@
   max-width: 140px;
   letter-spacing: -0.035em;
 }
-.honour-ftc .honour-result {
+.honour-ftc .honour-result,
+.honour-vex-iq .honour-result {
   font-size: 61px;
+}
+.honour.honour-ftc > p,
+.honour.honour-vex-iq > p {
+  font-size: 14px;
+}
+.honour.honour-ftc .achievement-context {
+  font-size: 18px;
+  color: #26321e;
+  margin: 14px 0 0;
+}
+.honour-vex-iq .achievement-context {
+  margin: 14px 0 0;
 }
 .honour p {
   font-size: 12px;
@@ -528,25 +555,6 @@
     flex-direction: row;
     gap: 20px;
   }
-  .honours-grid {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    gap: 30px 0;
-  }
-  .honours-grid > div {
-    grid-column: span 2;
-  }
-  .honours-grid > div:nth-child(-n + 2) {
-    grid-column: span 3;
-    padding-bottom: 28px;
-    border-bottom: 1px solid #607e3a65;
-  }
-  .honours-grid > div:nth-child(3) {
-    border-left: 0;
-    padding-left: 0;
-  }
-  .honours-grid > div:nth-child(2) {
-    padding-right: 0;
-  }
   .honour-ioai .honour-result {
     font-size: 30px;
     max-width: none;
@@ -654,9 +662,6 @@
   .ftc-result > span:first-child {
     font-size: 128px;
   }
-  .ftc-result > .world-label {
-    font-size: 21px;
-  }
   .experience-ftc .experience-copy {
     padding-top: 0;
   }
@@ -685,7 +690,7 @@
     display: block;
   }
   .honours-grid > div,
-  .honours-grid > div:nth-child(-n + 2) {
+  .honours-grid > div:nth-child(-n + 3) {
     padding: 16px 0;
     border-left: 0;
     border-bottom: 1px solid #607e3a65;
@@ -712,7 +717,8 @@
     font-size: 29px;
     max-width: 125px;
   }
-  .honour-ftc .honour-result {
+  .honour-ftc .honour-result,
+  .honour-vex-iq .honour-result {
     font-size: 57px;
   }
   .honour p {
@@ -721,6 +727,10 @@
   .honour h3 {
     font-size: 11px;
     margin-bottom: 6px;
+  }
+  .honour-ftc h3,
+  .honour-vex-iq h3 {
+    font-size: 12px;
   }
   .skills-section h2 {
     font-size: 40px;

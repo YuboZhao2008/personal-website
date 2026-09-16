@@ -3,12 +3,13 @@ export type Experience = {
   title: string;
   organization: string;
   period: string;
-  year: number;
+  year: number | null;
   category: string;
   statement: string;
   description: string;
   disciplines: string[];
   location?: string;
+  result?: { value: string; label: string; detail: string };
 };
 export type Project = {
   id: string;
@@ -81,7 +82,7 @@ export const profile = {
   about:
     "I'm a Software Engineering student at the University of Waterloo, working across machine learning, robotics, and intelligent software.",
   philosophy:
-    "I’m interested in building across the boundaries between models, perception, interfaces, and state. My work in competitive AI, robotics, and quantitative research keeps bringing me back to how those parts behave together under real constraints.",
+    "I’m interested in building across the boundaries between models, perception, interfaces, and state. My work in competitive AI, robotics—including three consecutive FTC World Championship qualifications—and quantitative research keeps bringing me back to how those parts behave together under real constraints.",
   experiences: [
     {
       id: "ioai",
@@ -103,11 +104,16 @@ export const profile = {
     {
       id: "ftc",
       title: "Robotics Team Member",
-      organization: "FIRST Tech Challenge World Championship",
-      period: "2024",
-      year: 2024,
+      organization: "FIRST Tech Challenge",
+      period: "Three consecutive seasons",
+      year: null,
       category: "INTERNATIONAL ROBOTICS",
-      statement: "2nd Place Globally. Built together, under pressure.",
+      statement: "Three consecutive FTC World Championship qualifications.",
+      result: {
+        value: "3×",
+        label: "WORLD CHAMPIONSHIP QUALIFIER",
+        detail: "2nd Place Globally — 2024 · team result",
+      },
       description:
         "Worked with teammates across software, mechanical, electrical, and strategy on a competition robot for autonomous and driver-controlled operation. The team’s work involved sensor integration, autonomous-control logic, debugging, and iterative performance tuning for international competition.",
       disciplines: [
@@ -266,13 +272,22 @@ export const profile = {
       verificationUrl: null,
       team: null,
       teamNumber: null,
-      resultDetail: null,
+      resultDetail: "2nd Place Globally — 2024 · team result",
       scope: null,
       title: "FTC World Championship",
       shortTitle: "FTC WORLD",
-      year: 2024,
-      result: "2ND",
-      detail: "Globally · team result",
+      year: null,
+      result: "3×",
+      detail: "Three consecutive World Championship qualifications",
+    },
+    {
+      id: "vex-iq",
+      title: "VEX IQ Robotics Skills",
+      shortTitle: "VEX IQ",
+      year: null,
+      result: "1ST",
+      detail: "1st Place · team result",
+      resultDetail: "Middle School Division · Dallas · Grade 8",
     },
     {
       id: "euclid",

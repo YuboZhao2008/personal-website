@@ -111,6 +111,73 @@ async function stableFrames(page) {
       ),
   );
 }
+async function roboticsContent(page) {
+  const experience = page.locator("#experience-ftc");
+  assert(
+    (await experience.locator(".experience-statement").innerText()).includes(
+      "Three consecutive FTC World Championship qualifications",
+    ),
+  );
+  const result = "2nd Place Globally — 2024 · team result";
+  assert.equal(
+    await experience.locator(".experience-result-detail").innerText(),
+    result,
+  );
+  const ftc = page.locator(".honour-ftc");
+  assert(
+    (await ftc.innerText()).includes(
+      "Three consecutive World Championship qualifications",
+    ),
+  );
+  assert.equal(await ftc.locator(".achievement-context").innerText(), result);
+  const vex = page.locator(".honour-vex-iq");
+  assert.equal(await vex.count(), 1);
+  for (const phrase of [
+    "VEX IQ",
+    "Robotics Skills",
+    "1st Place",
+    "team result",
+    "Middle School Division",
+    "Dallas",
+    "Grade 8",
+  ])
+    assert(
+      (await vex.innerText()).includes(phrase),
+      `Missing robotics context: ${phrase}`,
+    );
+  assert.equal(await vex.locator(".achievement-verification").count(), 0);
+  const accessible = await experience.ariaSnapshot();
+  assert(
+    accessible.includes(
+      "Three consecutive FTC World Championship qualifications",
+    ),
+  );
+  assert(accessible.includes(result));
+  for (const label of await page
+    .locator(
+      ".honour-ftc p, .honour-ftc h3, .honour-vex-iq p, .honour-vex-iq h3, .experience-result-detail",
+    )
+    .all())
+    assert(
+      await label.evaluate(
+        (el) =>
+          parseFloat(getComputedStyle(el).fontSize) >=
+          (el.tagName === "P" ? 14 : 12),
+      ),
+      "Robotics copy or heading is too small",
+    );
+  for (const card of [ftc, vex])
+    assert(
+      await card.evaluate((el) => {
+        const bounds = el.getBoundingClientRect();
+        return [...el.children].every((child) => {
+          const r = child.getBoundingClientRect();
+          return r.left >= bounds.left - 1 && r.right <= bounds.right + 1;
+        });
+      }),
+      "Robotics content extends outside its column",
+    );
+}
 async function warcraftLayout(page, width) {
   const card = page.locator("#project-warcraft-rl");
   assert.equal(await card.count(), 1);
@@ -351,6 +418,7 @@ try {
     );
     await noOverflow(page, width + "px initial");
     await warcraftLayout(page, width);
+    await roboticsContent(page);
     const visibleText = await page.locator("body").innerText();
     assert(
       !/[A-Za-z]\?[A-Za-z]|\uFFFD|Ã.|Â.|â€/.test(visibleText),
@@ -511,6 +579,17 @@ try {
       fullPage: true,
     });
     await page.screenshot({ path: "test-results/hero-" + width + ".png" });
+    if ([320, 390, 768, 1440].includes(width)) {
+      for (const [selector, name] of [
+        ["#experience-ftc", "ftc"],
+        ["#achievements", "honours"],
+      ]) {
+        await page.locator(selector).screenshot({
+          path: `test-results/robotics-${name}-${width}.png`,
+          style: screenshotStyle,
+        });
+      }
+    }
     if ([320, 390, 768, 1440].includes(width)) {
       await page.locator("#project-warcraft-rl").scrollIntoViewIfNeeded();
       await page.locator("#project-warcraft-rl").screenshot({
@@ -886,6 +965,7 @@ try {
   );
   await noOverflow(noJS, "JavaScript disabled");
   await warcraftLayout(noJS, 390);
+  await roboticsContent(noJS);
   const warcraftNotes = noJS.locator("#project-warcraft-rl .project-details");
   await warcraftNotes.locator("summary").click();
   assert(await warcraftNotes.evaluate((el) => el.open));
@@ -899,6 +979,7 @@ try {
   );
   report.checks.push(
     "server-rendered content and native disclosures without JavaScript",
+    "robotics: three consecutive FTC qualifications, 2024 second-place team result, VEX IQ Robotics Skills first-place team result, Middle School Division, Dallas, Grade 8, readable labels and column bounds",
   );
 
   assert.deepEqual(report.consoleErrors, []);

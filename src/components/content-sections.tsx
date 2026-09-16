@@ -1,5 +1,9 @@
 import { ArrowDownRight, ArrowUpRight, Plus } from "lucide-react";
-import { profile, type Experience as ExperienceData } from "@/data/profile";
+import {
+  profile,
+  type Achievement,
+  type Experience as ExperienceData,
+} from "@/data/profile";
 import { publicHref } from "@/data/links";
 import { AnimatedSection } from "./animated-section";
 import { SectionHeading } from "./ui";
@@ -38,7 +42,7 @@ function ExperienceEntry({ experience }: { experience: ExperienceData }) {
       className={`experience-entry experience-${experience.id}`}
     >
       <div className="experience-year mono">
-        <span>{experience.year}</span>
+        <span>{experience.year ?? experience.period}</span>
         <span>{experience.category}</span>
       </div>
       <div className="experience-identity">
@@ -49,12 +53,10 @@ function ExperienceEntry({ experience }: { experience: ExperienceData }) {
             <span>CANADA</span>
             <span className="ioai-code mono">IOAI / 2025</span>
           </div>
-        ) : experience.id === "ftc" ? (
-          <div className="experience-display ftc-result">
-            <span>
-              2<sup>ND</sup>
-            </span>
-            <span className="world-label">GLOBALLY</span>
+        ) : experience.result ? (
+          <div className="experience-display ftc-result" aria-hidden="true">
+            <span>{experience.result.value}</span>
+            <span className="world-label">{experience.result.label}</span>
           </div>
         ) : (
           <div className="quant-mark" aria-hidden="true">
@@ -79,6 +81,9 @@ function ExperienceEntry({ experience }: { experience: ExperienceData }) {
       </div>
       <div className="experience-copy">
         <p className="experience-statement">{experience.statement}</p>
+        {experience.result && (
+          <p className="experience-result-detail">{experience.result.detail}</p>
+        )}
         <p>{experience.description}</p>
         <ul className="discipline-list">
           {experience.disciplines.map((d) => (
@@ -166,7 +171,7 @@ export function Achievements() {
           />
         </AnimatedSection>
         <div className="honours-grid">
-          {profile.achievements.map((achievement) => (
+          {profile.achievements.map((achievement: Achievement) => (
             <AnimatedSection key={achievement.id}>
               <article className={`honour honour-${achievement.id}`}>
                 <div className="honour-label mono">
