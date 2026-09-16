@@ -23,7 +23,7 @@ Yubo Zhao's personal portfolio brings together projects, engineering experience,
 ## Highlights
 
 - **Responsive layouts:** custom desktop and mobile compositions, with a native modal mobile navigation dialog that handles keyboard focus, Escape, and viewport changes.
-- **Interactive technical illustrations:** a computational surface, multimodal architecture diagram, gesture landmark selector, and deterministic world-state controls. These illustrate the featured work; they do not run its AI models or process camera input.
+- **Interactive technical illustrations:** a computational surface, multimodal architecture diagram, Warcraft observation–policy–action loop, gesture landmark selector, and deterministic world-state controls. These illustrate the featured work; they do not run its AI models or process camera input.
 - **Motion controls:** support for `prefers-reduced-motion`, an ambient animation pause/resume control, and offscreen animation pausing.
 - **Content available without JavaScript:** prerendered portfolio content and native HTML disclosures for project notes and additional skills.
 - **Structured content:** typed project records select their presentation and visualization, while shared components render experience, achievements, and skills.
@@ -85,7 +85,7 @@ npm run test:browser
 
 Use the same `SITE_URL` value as the tested build when running the suite so metadata assertions match that build.
 
-The suite checks nine viewport widths from 320 to 1920 pixels, horizontal overflow, keyboard and touch interactions, mobile focus isolation and restoration, disclosures, motion preferences, punctuation, optional links, diagram bounds and mobile label sizes, production metadata, browser errors, and content without JavaScript. axe-core scans representative mobile, tablet, and desktop widths for WCAG A/AA rule violations.
+The suite checks eleven viewport widths from 320 to 1920 pixels, horizontal overflow, keyboard and touch interactions, mobile focus isolation and restoration, disclosures, motion preferences, punctuation, optional links, diagram bounds and mobile label sizes, production metadata, browser errors, and content without JavaScript. Warcraft-specific checks cover its control-loop diagram, stacked layout, readable labels, and ambient motion. axe-core scans representative mobile, tablet, and desktop widths for WCAG A/AA rule violations.
 
 | Browser test option | Default / usage                                                                                                           |
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------- |
@@ -98,9 +98,9 @@ Playwright Core uses an existing browser and does not download one. Test screens
 
 Edit [`src/data/profile.ts`](src/data/profile.ts) for profile information, education, projects, experience, achievements, skills, navigation links, and social destinations. Edit [`src/data/site.ts`](src/data/site.ts) for the site title, description, and origin handling.
 
-Each project includes an ID, description, technologies, engineering notes, a `presentation` (`flagship`, `case-study`, or `secondary`), and a `visual` (`intelligence`, `medical`, `gesture`, or `simulation`). Optional `evaluation` data includes measurement context. `originalTitle` preserves a résumé project name when its display title is clarified.
+Each project includes an ID, description, technologies, engineering notes, a `presentation` (`flagship`, `case-study`, or `secondary`), and a `visual` (`intelligence`, `warcraft`, `medical`, `gesture`, or `simulation`). Optional `evaluation` data includes measurement context. `originalTitle` preserves a formal or résumé project name when its display title is clarified.
 
-When adding projects, update the section introduction and counter in `src/components/content-sections.tsx`; browser checks use the configured project count. Adding a new visualization also requires extending the `Project` type and `ProjectVisual` renderer. Shared section copy lives in the components.
+When adding projects, review the section introduction in `src/components/content-sections.tsx`; the section counter and browser checks use the configured project count. Adding a new visualization also requires extending the `Project` type and `ProjectVisual` renderer. Substantial diagrams have standalone components, including `jarvis-visual.tsx` and `warcraft-visual.tsx`. Shared section copy lives in the components.
 
 | Configuration in `src/data/profile.ts`                                               | Behavior                                                                                            |
 | ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |

@@ -8,7 +8,7 @@ import { site } from "../src/data/site.ts";
 
 const require = createRequire(import.meta.url);
 const baseURL = process.env.BASE_URL || "http://127.0.0.1:3000";
-const widths = [320, 375, 390, 430, 768, 1024, 1280, 1440, 1920];
+const widths = [320, 375, 390, 430, 600, 768, 800, 1024, 1280, 1440, 1920];
 const report = {
   viewports: [],
   consoleErrors: [],
@@ -57,17 +57,25 @@ assert.deepEqual(
   ],
 );
 
-function observeErrors(page) {
+function observeErrors(page, { scriptsDisabled = false } = {}) {
   page.on("pageerror", (error) => report.consoleErrors.push(error.message));
   page.on("console", (message) => {
     if (message.type() === "error") report.consoleErrors.push(message.text());
   });
-  page.on("requestfailed", (request) =>
+  page.on("requestfailed", (request) => {
+    // Chromium deliberately blocks script requests when JavaScript is disabled.
+    // Keep reporting every other failure, including CSP failures in normal pages.
+    if (
+      scriptsDisabled &&
+      request.resourceType() === "script" &&
+      request.failure()?.errorText === "csp"
+    )
+      return;
     report.requestFailures.push({
       url: request.url(),
       error: request.failure()?.errorText,
-    }),
-  );
+    });
+  });
 }
 async function noOverflow(page, context) {
   const result = await page.evaluate(() => {
@@ -101,6 +109,76 @@ async function stableFrames(page) {
       new Promise((resolve) =>
         requestAnimationFrame(() => requestAnimationFrame(resolve)),
       ),
+  );
+}
+async function warcraftLayout(page, width) {
+  const card = page.locator("#project-warcraft-rl");
+  assert.equal(await card.count(), 1);
+  assert(
+    await card
+      .getByRole("heading", { name: "Warcraft III RL Agent", exact: true })
+      .isVisible(),
+  );
+  assert.equal(await card.locator(".warcraft-visual").count(), 1);
+  assert.equal(
+    await card.locator(".simulation-visual, .project-link").count(),
+    0,
+  );
+  const text = await card.locator("figure").innerText();
+  for (const label of [
+    "Lua state",
+    "IPC bridge",
+    "Python RL",
+    "PPO policy",
+    "Action queue",
+    "Lua controller",
+    "OBSERVATIONS",
+    "ACTIONS",
+    "Learned policies in development",
+  ])
+    assert(text.includes(label), `Missing Warcraft label: ${label}`);
+  assert(
+    await card.evaluate((el) => {
+      const cardBounds = el.getBoundingClientRect();
+      const figure = el.querySelector("figure");
+      const bounds = figure.getBoundingClientRect();
+      return (
+        bounds.left >= cardBounds.left &&
+        bounds.right <= cardBounds.right &&
+        [...figure.querySelectorAll("*")].every((node) => {
+          const r = node.getBoundingClientRect();
+          return (
+            r.left >= bounds.left - 1 &&
+            r.right <= bounds.right + 1 &&
+            r.top >= bounds.top - 1 &&
+            r.bottom <= bounds.bottom + 1
+          );
+        })
+      );
+    }),
+    `Warcraft diagram bounds at ${width}px`,
+  );
+  for (const label of await card
+    .locator("figure strong, figure span, dt, dd, figcaption, .warcraft-note")
+    .all())
+    assert(
+      await label.evaluate(
+        (el) => parseFloat(getComputedStyle(el).fontSize) >= 12,
+      ),
+      "Warcraft label below 12px",
+    );
+  if (width <= 800) {
+    const body = await card.locator(".project-body").boundingBox();
+    const visual = await card.locator(".project-visual").boundingBox();
+    assert(
+      visual.y >= body.y + body.height - 1,
+      "Warcraft must stack below its copy",
+    );
+  }
+  assert(
+    (await page.locator("#projects .section-counter").textContent()).includes(
+      `01 — ${String(profile.projects.length).padStart(2, "0")}`,
+    ),
   );
 }
 async function focused(locator) {
@@ -272,6 +350,7 @@ try {
       profile.projects.length,
     );
     await noOverflow(page, width + "px initial");
+    await warcraftLayout(page, width);
     const visibleText = await page.locator("body").innerText();
     assert(
       !/[A-Za-z]\?[A-Za-z]|\uFFFD|Ã.|Â.|â€/.test(visibleText),
@@ -386,6 +465,7 @@ try {
     for (let i = 0; i < (await disclosures.count()); i++) {
       await disclosures.nth(i).locator("summary").focus();
       await page.keyboard.press("Enter");
+      await focused(disclosures.nth(i).locator("summary"));
       assert(
         await disclosures.nth(i).evaluate((el) => el.open),
         "Disclosure failed with Enter",
@@ -431,6 +511,22 @@ try {
       fullPage: true,
     });
     await page.screenshot({ path: "test-results/hero-" + width + ".png" });
+    if ([320, 390, 768, 1440].includes(width)) {
+      await page.locator("#project-warcraft-rl").scrollIntoViewIfNeeded();
+      await page.locator("#project-warcraft-rl").screenshot({
+        path: `test-results/warcraft-${width}.png`,
+        style: screenshotStyle,
+      });
+      if (width === 390) {
+        const notes = page.locator("#project-warcraft-rl summary");
+        await notes.click();
+        await page.locator("#project-warcraft-rl").screenshot({
+          path: "test-results/warcraft-notes-390.png",
+          style: screenshotStyle,
+        });
+        await notes.click();
+      }
+    }
     if ([390, 1440].includes(width)) {
       for (const section of [
         "projects",
@@ -529,6 +625,37 @@ try {
       .locator(".field-trace")
       .evaluate((el) => getComputedStyle(el).animationPlayState),
     "paused",
+  );
+
+  await page.locator("#project-warcraft-rl").scrollIntoViewIfNeeded();
+  const warcraftSignal = page.locator(".warcraft-signal").first();
+  await page.waitForFunction(
+    () =>
+      getComputedStyle(document.querySelector(".warcraft-signal"))
+        .animationPlayState === "running",
+  );
+  await page.getByRole("button", { name: "Pause ambient motion" }).click();
+  assert.equal(
+    await warcraftSignal.evaluate(
+      (el) => getComputedStyle(el).animationPlayState,
+    ),
+    "paused",
+  );
+  await page.getByRole("button", { name: "Resume ambient motion" }).click();
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  assert.equal(
+    await warcraftSignal.evaluate((el) => getComputedStyle(el).animationName),
+    "none",
+  );
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.locator("#contact").scrollIntoViewIfNeeded();
+  await page.waitForFunction(
+    () =>
+      getComputedStyle(document.querySelector(".warcraft-signal"))
+        .animationPlayState === "paused",
+  );
+  report.checks.push(
+    "Warcraft: explicit renderer, anchor, readable labels, diagram bounds, stacked layout, keyboard disclosure, absent evidence, pause/resume, reduced motion, offscreen pause",
   );
 
   // All internal destinations, optional links, and metadata.
@@ -744,6 +871,7 @@ try {
     viewport: { width: 390, height: 844 },
     reducedMotion: "reduce",
   });
+  observeErrors(noJS, { scriptsDisabled: true });
   await noJS.goto(baseURL);
   assert.equal(
     await noJS.locator(".project-showcase").count(),
@@ -757,6 +885,18 @@ try {
       .evaluate((el) => el.open),
   );
   await noOverflow(noJS, "JavaScript disabled");
+  await warcraftLayout(noJS, 390);
+  const warcraftNotes = noJS.locator("#project-warcraft-rl .project-details");
+  await warcraftNotes.locator("summary").click();
+  assert(await warcraftNotes.evaluate((el) => el.open));
+  assert((await warcraftNotes.innerText()).includes("bidirectional IPC"));
+  assert(
+    (
+      await noJS
+        .locator("#project-warcraft-rl .project-description")
+        .innerText()
+    ).includes("external Python agent"),
+  );
   report.checks.push(
     "server-rendered content and native disclosures without JavaScript",
   );

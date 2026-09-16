@@ -18,7 +18,7 @@ export function ProjectShowcase({
       <div className="project-body">
         <div className="project-meta mono">
           <span>{project.category}</span>
-          <span>0{index + 1} /</span>
+          <span>{String(index + 1).padStart(2, "0")} /</span>
         </div>
         <h3>{project.title}</h3>
         <p className="project-subtitle">{project.subtitle}</p>

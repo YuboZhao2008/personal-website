@@ -666,6 +666,163 @@
     stroke-dashoffset: 0;
   }
 }
+.project-warcraft {
+  --ink: inherit;
+  --muted: inherit;
+  --border: inherit;
+  --accent: inherit;
+  background: var(--panel);
+  border: 1px solid var(--border);
+}
+.project-warcraft .project-body {
+  grid-column: 1;
+}
+.project-warcraft .project-visual {
+  grid-column: 2;
+}
+.project-warcraft .project-body h3 {
+  font-size: clamp(38px, 4.3vw, 58px);
+  max-width: 11ch;
+}
+.project-warcraft .project-technologies li {
+  color: var(--muted);
+}
+.project-warcraft :focus-visible {
+  outline-color: var(--accent);
+}
+.warcraft-visual {
+  width: 100%;
+  max-width: 540px;
+  margin: 0 auto;
+}
+.warcraft-caption.mono {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+  margin-bottom: 22px;
+}
+.warcraft-loop {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 26px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.warcraft-loop li {
+  position: relative;
+  min-width: 0;
+  border: 1px solid var(--border);
+  padding: 14px 10px;
+  text-align: center;
+}
+.warcraft-loop strong,
+.warcraft-loop span {
+  display: block;
+}
+.warcraft-loop strong {
+  font-size: 15px;
+  line-height: 1.4;
+  font-weight: 500;
+}
+.warcraft-loop span {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.warcraft-loop .warcraft-game {
+  grid-column: 1 / -1;
+  border-color: #667d4b;
+  background: #c5f27706;
+  padding: 16px 10px;
+}
+.warcraft-game strong {
+  font-size: 28px;
+  letter-spacing: -0.04em;
+  margin-top: 6px;
+}
+.warcraft-state {
+  grid-area: 2 / 1;
+}
+.warcraft-bridge {
+  grid-area: 3 / 1;
+}
+.warcraft-environment {
+  grid-area: 4 / 1;
+}
+.warcraft-policy {
+  grid-area: 4 / 2;
+}
+.warcraft-queue {
+  grid-area: 3 / 2;
+}
+.warcraft-controller {
+  grid-area: 2 / 2;
+}
+.warcraft-loop .warcraft-policy {
+  border-color: #667d4b;
+}
+.warcraft-arrow {
+  position: absolute;
+  color: var(--accent);
+  left: calc(50% - 8px);
+  bottom: -22px;
+}
+.warcraft-game > .warcraft-arrow {
+  left: calc(25% - 15px);
+}
+.warcraft-environment > .warcraft-arrow {
+  left: auto;
+  right: -22px;
+  bottom: calc(50% - 8px);
+}
+.warcraft-policy > .warcraft-arrow,
+.warcraft-queue > .warcraft-arrow,
+.warcraft-controller > .warcraft-arrow {
+  bottom: auto;
+  top: -22px;
+}
+.warcraft-signal {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: node-active 6s ease-in-out infinite;
+}
+.warcraft-policy .warcraft-signal {
+  animation-delay: 2s;
+}
+.warcraft-queue .warcraft-signal {
+  animation-delay: 4s;
+}
+.warcraft-interface {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  border-top: 1px solid var(--border);
+  margin: 24px 0 0;
+  padding-top: 18px;
+}
+.warcraft-interface dt {
+  color: var(--accent);
+  font-size: 12px;
+  line-height: 1.6;
+  margin-bottom: 6px;
+}
+.warcraft-interface dd,
+.warcraft-note {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
+  margin: 0;
+}
+.warcraft-note {
+  margin-top: 18px;
+}
 @media (max-width: 1100px) {
   .project-flagship .project-body,
   .project-case-study .project-body {

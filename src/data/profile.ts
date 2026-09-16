@@ -17,7 +17,7 @@ export type Project = {
   subtitle: string;
   category: string;
   description: string;
-  visual: "intelligence" | "medical" | "gesture" | "simulation";
+  visual: "intelligence" | "warcraft" | "medical" | "gesture" | "simulation";
   presentation: "flagship" | "case-study" | "secondary";
   details: string[];
   technologies: string[];
@@ -160,6 +160,32 @@ export const profile = {
       repositoryUrl: null,
       demoUrl: null,
       caseStudyUrl: null,
+    },
+    {
+      id: "warcraft-rl",
+      title: "Warcraft III RL Agent",
+      originalTitle: "Warcraft III Reinforcement Learning Agent",
+      subtitle:
+        "Custom reinforcement-learning environment for real-time RTS control",
+      category: "REINFORCEMENT LEARNING / GAME AI / SYSTEMS",
+      presentation: "case-study",
+      visual: "warcraft",
+      description:
+        "Built an environment that lets an external Python agent observe and control Warcraft III: Reforged in real time. Custom Lua instrumentation and bidirectional IPC expose live combat state and unit commands, creating the infrastructure to train autonomous micro-management policies.",
+      details: [
+        "Warcraft III has no native RL API, and its Lua sandbox lacks conventional networking for external ML tooling. A custom observation/action loop makes the game programmable from Python.",
+        "Lua instrumentation serializes live game state for the external Python runtime; bidirectional IPC carries Python-selected actions back to the in-game Lua controller.",
+        "A sequential command queue dispatches movement, attack, targeting, stop, and hero ability commands, addressing stale or repeated engine command behavior.",
+        "Gymnasium-style observation, action, and reward interfaces represent health, position, distance, targets, and combat state. Reward design includes damage dealt, damage received penalties, kills, deaths, positioning, and objectives.",
+        "The initial scenario is controlled Death Knight combat, with a PPO-oriented training architecture. Learned policies are in development; the environment is designed to expand toward multi-unit tactical decisions.",
+      ],
+      technologies: [
+        "Python",
+        "Lua",
+        "Reinforcement Learning",
+        "PPO",
+        "Game AI",
+      ],
     },
     {
       id: "brain-tumor",
