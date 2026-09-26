@@ -138,7 +138,7 @@ export function Projects() {
           number="03"
           eyebrow="SELECTED SYSTEMS"
           title="Intelligence, assembled."
-          description="AI agents and learning systems, from perception and simulation to reinforcement learning and real-time control."
+          description="AI agents, evidence-grounded research, and learning systems — connecting decision intelligence with perception and real-time control."
         />
         <span className="section-counter mono">
           01 — {String(profile.projects.length).padStart(2, "0")}

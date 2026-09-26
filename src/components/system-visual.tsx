@@ -32,13 +32,13 @@ const modes = [
     signal: "PERCEPTION → CONTROL",
   },
   {
-    label: "Worlds",
+    label: "Research",
     index: "04",
-    title: "What happens next?",
-    detail: "World states, dynamics, and possible futures.",
-    link: "#project-future-sim",
-    project: "FUTURE-SIM",
-    signal: "STATE → FUTURE",
+    title: "From sources to decisions.",
+    detail: "Source-backed claims and profile-specific pitch analysis.",
+    link: "#project-roomread",
+    project: "ROOMREAD",
+    signal: "EVIDENCE → ANALYSIS",
   },
 ];
 // Deterministic geometry: an abstract computational field, not measured data.

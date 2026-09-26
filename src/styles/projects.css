@@ -666,7 +666,8 @@
     stroke-dashoffset: 0;
   }
 }
-.project-warcraft {
+.project-warcraft,
+.project-roomread {
   --ink: inherit;
   --muted: inherit;
   --border: inherit;
@@ -674,21 +675,117 @@
   background: var(--panel);
   border: 1px solid var(--border);
 }
-.project-warcraft .project-body {
+.project-warcraft .project-body,
+.project-roomread .project-body {
   grid-column: 1;
 }
-.project-warcraft .project-visual {
+.project-warcraft .project-visual,
+.project-roomread .project-visual {
   grid-column: 2;
 }
 .project-warcraft .project-body h3 {
   font-size: clamp(38px, 4.3vw, 58px);
   max-width: 11ch;
 }
-.project-warcraft .project-technologies li {
+.project-warcraft .project-technologies li,
+.project-roomread .project-technologies li {
   color: var(--muted);
 }
-.project-warcraft :focus-visible {
+.project-warcraft :focus-visible,
+.project-roomread :focus-visible {
   outline-color: var(--accent);
+}
+.roomread-visual {
+  width: 100%;
+  max-width: 540px;
+  margin: 0 auto;
+}
+.roomread-caption.mono {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--muted);
+  margin-bottom: 22px;
+}
+.roomread-pipeline,
+.roomread-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.roomread-pipeline {
+  display: grid;
+  gap: 26px;
+}
+.roomread-phase {
+  position: relative;
+  border: 1px solid var(--border);
+  padding: 18px;
+  background: #c5f27704;
+}
+.roomread-phase:nth-child(2) {
+  border-color: #667d4b;
+  background: #c5f27709;
+}
+.roomread-phase-label.mono {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--accent);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.roomread-signal {
+  width: 5px;
+  height: 5px;
+  flex-shrink: 0;
+  background: var(--accent);
+  animation: node-active 9s ease-in-out infinite;
+}
+.roomread-phase:nth-child(2) .roomread-signal {
+  animation-delay: 3s;
+}
+.roomread-phase:nth-child(3) .roomread-signal {
+  animation-delay: 6s;
+}
+.roomread-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-block: 14px 10px;
+}
+.roomread-steps li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.roomread-steps strong {
+  font-size: 15px;
+  line-height: 1.5;
+  font-weight: 500;
+}
+.roomread-steps svg {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.roomread-phase p,
+.roomread-note {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
+  margin: 0;
+}
+.roomread-connector {
+  position: absolute;
+  bottom: -22px;
+  left: calc(50% - 8px);
+  color: var(--accent);
+}
+.roomread-note {
+  border-top: 1px solid var(--border);
+  padding-top: 18px;
+  margin-top: 22px;
 }
 .warcraft-visual {
   width: 100%;

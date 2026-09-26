@@ -260,6 +260,80 @@ async function focused(locator) {
     "Keyboard focus is not visibly outlined",
   );
 }
+async function roomreadLayout(page, width) {
+  const expectedOrder = ["jarvis", "roomread", "warcraft-rl", "brain-tumor", "gesture", "future-sim"];
+  assert.equal(profile.projects.length, 6);
+  assert.deepEqual(
+    await page.locator(".project-showcase").evaluateAll((cards) => cards.map((card) => card.id)),
+    expectedOrder.map((id) => `project-${id}`),
+  );
+  assert.equal(await page.locator('.project-flagship').count(), 1);
+  assert.equal(await page.locator("#project-future-sim").count(), 1);
+  assert((await page.locator("#projects .section-counter").textContent()).includes("01 — 06"));
+  for (let i = 0; i < expectedOrder.length; i++)
+    assert.equal(
+      await page.locator(`#project-${expectedOrder[i]} .project-meta > span:last-child`).innerText(),
+      `${String(i + 1).padStart(2, "0")} /`,
+    );
+  const card = page.locator("#project-roomread");
+  assert(await card.getByRole("heading", { name: "RoomRead", exact: true }).isVisible());
+  assert.equal(await card.locator(".preview-roomread .roomread-visual").count(), 1);
+  assert.equal(await card.locator(".simulation-visual, .warcraft-visual, .medical-visual, .jarvis-visual, .gesture-visual, .project-link, a").count(), 0);
+  assert.deepEqual(await card.locator(".roomread-steps strong").allTextContents(), [
+    "Sources", "Discovery", "Content / transcripts", "Chunks", "Observations",
+    "Validation", "Evidence", "Claims", "Decision profile", "Pitch analysis",
+  ]);
+  for (const label of await card.locator("figure strong, figure p, figure span, figcaption").all())
+    assert(await label.evaluate((el) => parseFloat(getComputedStyle(el).fontSize) >= 12), "RoomRead label below 12px");
+  assert(await card.evaluate((el) => {
+    const figure = el.querySelector("figure");
+    const bounds = figure.getBoundingClientRect();
+    const cardBounds = el.getBoundingClientRect();
+    return bounds.left >= cardBounds.left && bounds.right <= cardBounds.right &&
+      [...figure.querySelectorAll("*")].every((node) => {
+        const r = node.getBoundingClientRect();
+        return r.left >= bounds.left - 1 && r.right <= bounds.right + 1 &&
+          r.top >= bounds.top - 1 && r.bottom <= bounds.bottom + 1;
+      });
+  }), `RoomRead diagram bounds at ${width}px`);
+  const body = await card.locator(".project-body").boundingBox();
+  const visual = await card.locator(".project-visual").boundingBox();
+  if (width <= 800)
+    assert(visual.y >= body.y + body.height - 1, "RoomRead must stack below its copy");
+  else
+    assert(visual.x >= body.x + body.width - 1, "RoomRead desktop columns");
+  const bounds = await card.boundingBox();
+  const exhibits = await page.locator(".project-exhibits").boundingBox();
+  assert(Math.abs(bounds.width - exhibits.width) < 2, "RoomRead must be full-width");
+  const warcraft = await page.locator("#project-warcraft-rl").boundingBox();
+  const medical = await page.locator("#project-brain-tumor").boundingBox();
+  assert(warcraft.y > bounds.y + bounds.height && medical.y > warcraft.y + warcraft.height, "Case-study spacing");
+}
+async function secondaryLayout(page, width) {
+  const gesture = page.locator("#project-gesture.project-secondary");
+  const future = page.locator("#project-future-sim.project-secondary");
+  assert.equal(await gesture.count(), 1);
+  assert.equal(await future.count(), 1);
+  assert.equal(await page.locator(".project-secondary").count(), 2);
+  assert(await future.getByRole("heading", { name: "Future-Sim", exact: true }).isVisible());
+  assert.equal(await future.locator(".preview-simulation .simulation-visual").count(), 1);
+  assert.equal(await future.locator(".world-grid > span").count(), 80);
+  const gestureBounds = await gesture.boundingBox();
+  const futureBounds = await future.boundingBox();
+  const exhibits = await page.locator(".project-exhibits").boundingBox();
+  if (width > 600) {
+    assert(Math.abs(gestureBounds.y - futureBounds.y) < 2, "Secondary projects share a desktop row");
+    assert(futureBounds.x > gestureBounds.x + gestureBounds.width, "Secondary columns do not overlap");
+    assert(gestureBounds.width < exhibits.width / 2 && futureBounds.width < exhibits.width / 2, "Secondary projects remain compact");
+  } else {
+    assert(futureBounds.y > gestureBounds.y + gestureBounds.height, "Secondary projects stack on mobile");
+    assert(Math.abs(futureBounds.x - gestureBounds.x) < 2, "Secondary mobile alignment");
+    assert(Math.abs(gestureBounds.width - exhibits.width) < 2 && Math.abs(futureBounds.width - exhibits.width) < 2, "Secondary projects fill the mobile column");
+  }
+  const grid = await future.locator(".world-grid").boundingBox();
+  const controls = await future.locator(".simulation-controls").boundingBox();
+  assert(grid.y + grid.height <= controls.y, "World grid does not overlap controls");
+}
 async function disclosureAccessibility(page, count, expanded) {
   // Native summary exposes expanded state in Chromium's accessibility tree;
   // Playwright's text snapshot currently omits the DisclosureTriangle role.
@@ -418,6 +492,8 @@ try {
     );
     await noOverflow(page, width + "px initial");
     await warcraftLayout(page, width);
+    await roomreadLayout(page, width);
+    await secondaryLayout(page, width);
     await roboticsContent(page);
     const visibleText = await page.locator("body").innerText();
     assert(
@@ -486,7 +562,7 @@ try {
       }
     }
     // Every visualization control works without a mouse.
-    for (const name of ["Vision / ML", "Robotics", "Worlds", "Agents"]) {
+    for (const name of ["Vision / ML", "Robotics", "Research", "Agents"]) {
       const selector = page
         .getByRole("group", { name: "Explore engineering focus" })
         .getByRole("button", { name, exact: false });
@@ -508,26 +584,16 @@ try {
         ),
       );
     }
-    const gridBounds = await page.locator(".world-grid").boundingBox();
-    const controlsBounds = await page
-      .locator(".simulation-controls")
-      .boundingBox();
-    assert(
-      gridBounds.y + gridBounds.height <= controlsBounds.y,
-      "World grid overlaps its controls",
-    );
-    await page.getByRole("button", { name: "Step state" }).click();
-    assert(
-      (
-        await page.locator(".simulation-visual .visual-topline").textContent()
-      ).includes("t = 1"),
-    );
-    await page.getByRole("button", { name: "Reset world state" }).click();
-    assert(
-      (
-        await page.locator(".simulation-visual .visual-topline").textContent()
-      ).includes("t = 0"),
-    );
+    const step = page.getByRole("button", { name: "Step state" });
+    await step.focus();
+    await page.keyboard.press("Enter");
+    await focused(step);
+    assert((await page.locator(".simulation-visual .visual-topline").textContent()).includes("t = 1"));
+    const reset = page.getByRole("button", { name: "Reset world state" });
+    await reset.focus();
+    await page.keyboard.press("Space");
+    await focused(reset);
+    assert((await page.locator(".simulation-visual .visual-topline").textContent()).includes("t = 0"));
 
     const disclosures = page.locator(".project-details, .skill-details");
     for (let i = 0; i < (await disclosures.count()); i++) {
@@ -591,6 +657,10 @@ try {
       }
     }
     if ([320, 390, 768, 1440].includes(width)) {
+      await page.locator("#project-roomread").screenshot({
+        path: `test-results/roomread-${width}.png`,
+        style: screenshotStyle,
+      });
       await page.locator("#project-warcraft-rl").scrollIntoViewIfNeeded();
       await page.locator("#project-warcraft-rl").screenshot({
         path: `test-results/warcraft-${width}.png`,
@@ -677,7 +747,7 @@ try {
   await page.emulateMedia({ reducedMotion: "no-preference" });
   const target = page
     .getByRole("group", { name: "Explore engineering focus" })
-    .getByRole("button", { name: "Worlds" });
+    .getByRole("button", { name: "Research" });
   const beforeHover = await target.evaluate(
     (el) => getComputedStyle(el).backgroundColor,
   );
@@ -692,7 +762,7 @@ try {
   await target.click();
   assert(
     (await page.locator(".system-readout").textContent()).includes(
-      "What happens next?",
+      "From sources to decisions.",
     ),
   );
   await page.locator("#projects").scrollIntoViewIfNeeded();
@@ -735,6 +805,37 @@ try {
   );
   report.checks.push(
     "Warcraft: explicit renderer, anchor, readable labels, diagram bounds, stacked layout, keyboard disclosure, absent evidence, pause/resume, reduced motion, offscreen pause",
+  );
+
+  await page.locator("#project-roomread").scrollIntoViewIfNeeded();
+  const roomreadSignal = page.locator(".roomread-signal").first();
+  await page.waitForFunction(
+    () =>
+      getComputedStyle(document.querySelector(".roomread-signal"))
+        .animationPlayState === "running",
+  );
+  await page.getByRole("button", { name: "Pause ambient motion" }).click();
+  assert.equal(
+    await roomreadSignal.evaluate(
+      (el) => getComputedStyle(el).animationPlayState,
+    ),
+    "paused",
+  );
+  await page.getByRole("button", { name: "Resume ambient motion" }).click();
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  assert.equal(
+    await roomreadSignal.evaluate((el) => getComputedStyle(el).animationName),
+    "none",
+  );
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.locator("#contact").scrollIntoViewIfNeeded();
+  await page.waitForFunction(
+    () =>
+      getComputedStyle(document.querySelector(".roomread-signal"))
+        .animationPlayState === "paused",
+  );
+  report.checks.push(
+    "RoomRead: explicit renderer, anchor, readable labels, diagram bounds, stacked layout, keyboard disclosure, absent evidence, pause/resume, reduced motion, offscreen pause",
   );
 
   // All internal destinations, optional links, and metadata.
@@ -925,12 +1026,6 @@ try {
       .getAttribute("aria-pressed"),
     "true",
   );
-  await touch.getByRole("button", { name: "Step state" }).tap();
-  assert(
-    (
-      await touch.locator(".simulation-visual .visual-topline").textContent()
-    ).includes("t = 1"),
-  );
   await touch.getByRole("button", { name: "Open navigation" }).tap();
   await touch.setViewportSize({ width: 1024, height: 900 });
   await touch.setViewportSize({ width: 390, height: 844 });
@@ -941,7 +1036,7 @@ try {
     "false",
   );
   report.checks.push(
-    "touch navigation, gesture selection, state stepping, resize closes mobile menu",
+    "touch navigation, gesture selection, resize closes mobile menu",
     "reviewer regression: mobile keyboard opening, forward/reverse Tab, Escape, focus return, all destinations, punctuation, diagram bounds and label sizes, optional links, production origin",
   );
 
@@ -965,6 +1060,13 @@ try {
   );
   await noOverflow(noJS, "JavaScript disabled");
   await warcraftLayout(noJS, 390);
+  await roomreadLayout(noJS, 390);
+  await secondaryLayout(noJS, 390);
+  const roomreadNotes = noJS.locator("#project-roomread .project-details");
+  await roomreadNotes.locator("summary").click();
+  assert(await roomreadNotes.evaluate((el) => el.open));
+  assert((await roomreadNotes.innerText()).includes("evidence-fit gates"));
+  assert((await noJS.locator("#project-roomread .project-description").innerText()).includes("structured decision-maker profiles"));
   await roboticsContent(noJS);
   const warcraftNotes = noJS.locator("#project-warcraft-rl .project-details");
   await warcraftNotes.locator("summary").click();

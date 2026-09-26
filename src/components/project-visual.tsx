@@ -4,6 +4,7 @@ import { ArrowRight, RotateCcw } from "lucide-react";
 import type { Project } from "@/data/profile";
 import { JarvisVisual } from "./jarvis-visual";
 import { WarcraftVisual } from "./warcraft-visual";
+import { RoomReadVisual } from "./roomread-visual";
 
 function MedicalVisual() {
   return (
@@ -251,6 +252,8 @@ export function ProjectVisual({ variant }: { variant: Project["visual"] }) {
     <div className={`project-visual preview-${variant}`}>
       {variant === "intelligence" ? (
         <JarvisVisual />
+      ) : variant === "roomread" ? (
+        <RoomReadVisual />
       ) : variant === "warcraft" ? (
         <WarcraftVisual />
       ) : variant === "medical" ? (

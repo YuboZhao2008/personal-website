@@ -18,7 +18,7 @@ export type Project = {
   subtitle: string;
   category: string;
   description: string;
-  visual: "intelligence" | "warcraft" | "medical" | "gesture" | "simulation";
+  visual: "intelligence" | "roomread" | "warcraft" | "medical" | "gesture" | "simulation";
   presentation: "flagship" | "case-study" | "secondary";
   details: string[];
   technologies: string[];
@@ -166,6 +166,25 @@ export const profile = {
       repositoryUrl: null,
       demoUrl: null,
       caseStudyUrl: null,
+    },
+    {
+      id: "roomread",
+      title: "RoomRead",
+      subtitle:
+        "Evidence-grounded decision intelligence for high-stakes conversations",
+      category: "AI RESEARCH / DECISION INTELLIGENCE / PRODUCT SYSTEMS",
+      presentation: "case-study",
+      visual: "roomread",
+      description:
+        "Built a research system that turns public source material into structured decision-maker profiles. Source-backed claims retain provenance, contradictions, and context, helping people prepare a pitch against documented decision patterns. A historical profile built from Paul Graham’s essays grounds the prototype in real source material.",
+      details: [
+        "Provenance-first research: claims trace through evidence and attributed observations to source chunks, original URLs, and dates. The Paul Graham profile contains historical inferences, with explicit limits on interpreting current views.",
+        "Extraction pipeline: Exa discovery and content acquisition, plus a Supadata transcript adapter, feed filtered chunks into structured OpenAI extraction. Observation extraction is separate from pattern mapping and claim aggregation; provider tests use mocked, bounded requests.",
+        "Evidence safeguards: schema checks, valid excerpt spans, and evidence-fit gates control admission. Contradictions stay distinct from qualifications; insufficient evidence triggers abstention. Safe diagnostics distinguish empty responses from malformed output.",
+        "Versioned persistence: a relational Supabase schema connects source provenance, evidence, claims, immutable profile versions, and research jobs with restricted access. Drafts remain separate from reviewed profiles.",
+        "Decision analysis: deterministic rules compare pitch text against the selected profile’s documented claims, with source coverage and report limitations. Browser-local reports can be reopened; separate Edit / New flows, draft recovery, and persistent sample Undo preserve the working context.",
+      ],
+      technologies: ["TypeScript", "Next.js / React", "Supabase", "Exa", "Supadata", "OpenAI"],
     },
     {
       id: "warcraft-rl",
