@@ -1,6 +1,20 @@
 import type { Metadata } from "next";
+import localFont from "next/font/local";
 import { site } from "@/data/site";
 import "./globals.css";
+
+const display = localFont({
+  src: "./fonts/space-grotesk-latin.woff2",
+  variable: "--font-display",
+  weight: "400 700",
+  display: "swap",
+});
+const body = localFont({
+  src: "./fonts/manrope-latin.woff2",
+  variable: "--font-body",
+  weight: "400 700",
+  display: "swap",
+});
 
 const shareImage = site.url
   ? [
@@ -41,7 +55,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${display.variable} ${body.variable}`}>
       <body>
         <a href="#main" className="skip-link">
           Skip to content

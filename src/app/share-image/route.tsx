@@ -10,8 +10,8 @@ export function GET() {
         flexDirection: "column",
         width: "100%",
         height: "100%",
-        background: "#141614",
-        color: "#f1f2e9",
+        background: "#080f1e",
+        color: "#edf2fa",
         padding: "58px 64px",
         fontFamily: "sans-serif",
       }}
@@ -21,8 +21,8 @@ export function GET() {
           display: "flex",
           justifyContent: "space-between",
           fontSize: 17,
-          color: "#abb3a0",
-          borderBottom: "1px solid #46503d",
+          color: "#a4b2c7",
+          borderBottom: "1px solid #29364c",
           paddingBottom: 24,
         }}
       >
@@ -38,7 +38,7 @@ export function GET() {
           marginTop: 30,
         }}
       >
-        YUBO <span style={{ color: "#c5f277", marginLeft: 28 }}>ZHAO.</span>
+        Yubo <span style={{ color: "#9db9ff", marginLeft: 28 }}>Zhao.</span>
       </div>
       <div style={{ display: "flex", fontSize: 31, marginTop: 12 }}>
         Building systems that perceive, reason, and interact.
@@ -47,7 +47,7 @@ export function GET() {
         style={{
           display: "flex",
           fontSize: 21,
-          color: "#abb3a0",
+          color: "#a4b2c7",
           marginTop: 21,
         }}
       >
@@ -58,14 +58,14 @@ export function GET() {
           display: "flex",
           gap: 46,
           fontSize: 22,
-          color: "#c5f277",
-          borderTop: "1px solid #46503d",
+          color: "#9db9ff",
+          borderTop: "1px solid #29364c",
           paddingTop: 28,
           marginTop: "auto",
         }}
       >
         <span>TEAM CANADA / IOAI 2025</span>
-        <span>2ND GLOBALLY / FTC WORLD 2024</span>
+        <span>2ND GLOBALLY / FTC WORLD 2024 · TEAM RESULT</span>
       </div>
     </div>,
     { width: 1200, height: 630 },

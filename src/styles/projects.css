@@ -1,90 +1,128 @@
+/* Projects are a curated exhibition, with live technical studies kept intact. */
 .gesture-plane-label {
   display: none;
 }
 .projects-section {
-  border-top: 1px solid var(--border);
+  position: relative;
+}
+.projects-section > .section-title-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  margin-bottom: 90px;
+}
+.projects-section .section-heading {
+  max-width: 800px;
+}
+.projects-section .section-heading h2 {
+  font-size: clamp(54px, 7.6vw, 112px);
+  letter-spacing: -0.065em;
+}
+.projects-section .section-heading > p {
+  max-width: 580px;
 }
 .section-counter {
-  color: var(--muted);
+  display: flex;
+  flex-direction: column;
   text-align: right;
-  line-height: 1.9;
+  color: var(--muted);
   font-size: 10px;
+  line-height: 1.8;
   flex-shrink: 0;
+}
+.section-counter strong {
+  font-family: var(--font-display), sans-serif;
+  color: var(--ink);
+  font-size: 76px;
+  line-height: 1.2;
+  font-weight: 400;
+  letter-spacing: -0.06em;
+}
+.project-section-rule {
+  display: block;
+  height: 1px;
+  background: var(--border);
+  transform-origin: left center;
+  margin: -40px 0 48px;
 }
 .project-exhibits {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 50px 40px;
+  gap: 82px 48px;
   align-items: start;
 }
 .exhibit-flagship,
 .exhibit-case-study {
-  grid-column: 1/-1;
+  grid-column: 1 / -1;
 }
 .project-showcase {
+  position: relative;
   min-width: 0;
-  scroll-margin-top: 105px;
+  scroll-margin-top: 110px;
 }
+
 .project-body {
   min-width: 0;
 }
 .project-meta {
   display: flex;
   justify-content: space-between;
-  gap: 15px;
+  align-items: center;
+  gap: 16px;
   font-size: 10px;
   color: var(--muted);
-  line-height: 1.7;
-}
-.project-meta > span:last-child {
-  white-space: nowrap;
-  color: var(--accent);
+  line-height: 1.8;
+  letter-spacing: 0.04em;
 }
 .project-body h3 {
-  font-size: 36px;
-  line-height: 1.07;
-  letter-spacing: -0.05em;
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(36px, 4.2vw, 62px);
+  line-height: 1.05;
+  letter-spacing: -0.055em;
   font-weight: 500;
-  margin: 25px 0 10px;
+  margin: 26px 0 18px;
   text-wrap: balance;
 }
 .project-subtitle {
-  font-size: 16px;
   color: var(--ink);
-  line-height: 1.5;
-  margin-bottom: 23px;
+  font-size: 18px;
+  line-height: 1.6;
+  margin: 0 0 24px;
 }
 .project-description {
   color: var(--muted);
   font-size: 15px;
-  line-height: 1.85;
-  max-width: 55ch;
-  margin-bottom: 24px;
+  line-height: 1.9;
+  max-width: 61ch;
+  margin: 0 0 24px;
 }
 .project-technologies {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 17px;
+  gap: 8px 10px;
   list-style: none;
   padding: 0;
   margin: 0;
 }
 .project-technologies li {
-  font: 11px/1.7 var(--mono);
-  color: #c5cabc;
+  font: 12px/1.7 var(--mono);
+  color: var(--muted);
+  border: 1px solid var(--border);
+  padding: 4px 9px;
 }
 .project-details {
-  margin-top: 25px;
+  margin-top: 30px;
   border-top: 1px solid var(--border);
 }
 .project-details summary {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  min-height: 49px;
+  min-height: 54px;
   font-size: 13px;
   cursor: pointer;
   list-style: none;
+  transition: color 0.25s;
 }
 .project-details summary::-webkit-details-marker,
 .skill-details summary::-webkit-details-marker {
@@ -108,49 +146,149 @@
 }
 .project-details li {
   font-size: 14px;
-  line-height: 1.8;
+  line-height: 1.9;
   color: var(--muted);
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 .project-link {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
   gap: 14px;
-  margin-top: 15px;
-  margin-right: 20px;
+  margin: 15px 20px 0 0;
   color: var(--accent);
   font-size: 14px;
 }
 .project-visual {
   min-width: 0;
+  position: relative;
+  padding: 36px;
+  background: #101c30;
+  border: 1px solid #283951;
+  overflow: hidden;
+}
+.project-visual::before {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  inset: 0;
+  background: radial-gradient(ellipse at 40% 0%, #527cff0c, transparent 65%);
+}
+.project-visual > div {
+  position: relative;
 }
 .project-flagship {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  background: #20251b;
-  border-top: 2px solid var(--accent);
+  grid-template-columns: 0.92fr 1.08fr;
+  border: 1px solid #34486a;
+  background: #101b2e;
 }
 .project-flagship .project-body {
-  padding: 45px;
+  padding: 48px;
 }
 .project-flagship h3 {
-  font-size: 105px;
-  letter-spacing: -0.075em;
+  font-size: clamp(80px, 9vw, 132px);
   line-height: 1;
-  margin: 35px 0 4px;
+  margin-top: 40px;
+  margin-bottom: 12px;
+  letter-spacing: -0.075em;
 }
 .project-flagship .project-subtitle {
-  font-size: 21px;
-  letter-spacing: -0.025em;
+  font-size: 22px;
 }
 .project-flagship .project-visual {
-  border-left: 1px solid #46513c;
-  padding: 30px 35px;
+  border: 0;
+  border-left: 1px solid #34486a;
+  display: flex;
+  align-items: center;
+  padding: 44px;
+  background: #0b1526;
+}
+.project-case-study {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 72px;
+  align-items: center;
+}
+.project-case-study .project-visual {
   align-self: stretch;
   display: flex;
   align-items: center;
-  background: linear-gradient(130deg, transparent, #0e140dc0);
+}
+.project-roomread .project-body {
+  grid-column: 2;
+  grid-row: 1;
+}
+.project-roomread .project-visual {
+  grid-column: 1;
+  grid-row: 1;
+}
+.project-warcraft .project-body h3 {
+  max-width: 11ch;
+}
+.project-warcraft .project-visual {
+  background: #122037;
+}
+.project-medical {
+  --ink: #172b48;
+  --muted: #4e617d;
+  --accent: #345fbd;
+  --border: #a7b7ce;
+  background: #e4ebf4;
+  color: var(--ink);
+  gap: 0;
+}
+.project-medical .project-body {
+  grid-column: 2;
+  grid-row: 1;
+  padding: 44px;
+}
+.project-medical .project-visual {
+  grid-column: 1;
+  grid-row: 1;
+  border: 0;
+  background: #d9e3ef;
+  padding: 36px;
+}
+.project-secondary {
+  display: flex;
+  flex-direction: column;
+}
+.project-secondary .project-visual {
+  order: -1;
+  margin-bottom: 34px;
+  padding: 22px 28px 26px;
+}
+.project-secondary .project-body h3 {
+  font-size: clamp(30px, 3.2vw, 44px);
+  max-width: 500px;
+}
+.project-secondary .project-subtitle {
+  font-size: 17px;
+}
+.project-evaluation {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 25px 0 0;
+}
+.project-evaluation strong {
+  font-family: var(--font-display), sans-serif;
+  font-size: 45px;
+  font-weight: 500;
+  color: var(--accent);
+  letter-spacing: -0.055em;
+}
+.project-evaluation span {
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--muted);
+  max-width: 190px;
+}
+
+/* Project-specific technical diagrams. */
+.gesture-plane-label {
+  display: none;
 }
 .jarvis-visual {
   width: 100%;
@@ -183,14 +321,14 @@
   position: relative;
   height: 51px;
   margin: 14px 16.5% 0;
-  border-bottom: 1px solid #7b9260;
+  border-bottom: 1px solid #607492;
 }
 .jarvis-bus > span {
   position: absolute;
   top: 0;
   bottom: 0;
   width: 1px;
-  background: #7b9260;
+  background: #607492;
 }
 .jarvis-bus > span:nth-child(1) {
   left: 0;
@@ -208,7 +346,7 @@
   left: 50%;
   height: 25px;
   width: 1px;
-  background: #7b9260;
+  background: #607492;
 }
 .jarvis-bus > i {
   position: absolute;
@@ -222,12 +360,12 @@
   margin: 25px 8% 0;
   padding: 22px 10px;
   text-align: center;
-  background: #c5f2770a;
-  border: 1px solid #b7d68c;
+  background: #80aae90a;
+  border: 1px solid #8caad6;
 }
 .jarvis-engine > .mono {
   font-size: 9px;
-  color: #b5c2a8;
+  color: #a8b2c2;
 }
 .jarvis-engine-name {
   display: flex;
@@ -303,39 +441,6 @@
 .jarvis-visual > .diagram-note {
   text-align: center;
 }
-.project-case-study {
-  --ink: #20281e;
-  --muted: #56604d;
-  --border: #bbc5ac;
-  --accent: #40572a;
-  background: #e4e9d9;
-  color: var(--ink);
-  display: grid;
-  grid-template-columns: 1.03fr 1fr;
-}
-.project-case-study .project-body {
-  grid-column: 2;
-  grid-row: 1;
-  padding: 45px;
-}
-.project-case-study h3 {
-  font-size: 46px;
-}
-.project-case-study .project-subtitle {
-  font-size: 17px;
-}
-.project-case-study .project-technologies li {
-  color: #46553a;
-}
-.project-case-study .project-visual {
-  grid-column: 1;
-  grid-row: 1;
-  padding: 30px;
-  align-self: center;
-}
-.project-case-study :focus-visible {
-  outline-color: #314820;
-}
 .medical-slice {
   position: relative;
 }
@@ -345,26 +450,26 @@
   margin: 10px 0 0;
 }
 .slice-guides {
-  stroke: #899b7366;
+  stroke: #73839b66;
   stroke-width: 0.8;
   fill: none;
 }
 .slice-contours {
-  fill: #55684704;
-  stroke: #566e45;
+  fill: #47546804;
+  stroke: #45556e;
   stroke-width: 0.85;
 }
 .slice-patches rect {
-  fill: #657a4105;
-  stroke: #647b4540;
+  fill: #41587a05;
+  stroke: #455b7b40;
   stroke-width: 0.5;
 }
 .slice-patches .patch-active {
-  fill: #92ad5560;
+  fill: #5578ad60;
   animation: patch-active 8s ease-in-out infinite alternate;
 }
 .slice-scan {
-  stroke: #3c5b20;
+  stroke: #20385b;
   stroke-width: 1;
   animation: slice-scan 9s ease-in-out infinite alternate;
   opacity: 0.5;
@@ -404,42 +509,6 @@
   margin-top: 20px;
   color: var(--muted);
 }
-.project-secondary {
-  display: flex;
-  flex-direction: column;
-  border-top: 1px solid var(--border);
-}
-.project-secondary .project-visual {
-  order: -1;
-  margin-bottom: 30px;
-  background: #1a1e19;
-  padding: 0 24px 22px;
-}
-.project-secondary .project-body h3 {
-  max-width: 480px;
-  font-size: 34px;
-}
-.project-secondary .project-description {
-  max-width: 58ch;
-}
-.project-evaluation {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  padding: 24px 0 0;
-}
-.project-evaluation strong {
-  font-size: 38px;
-  font-weight: 400;
-  color: var(--accent);
-  letter-spacing: -0.05em;
-}
-.project-evaluation span {
-  font-size: 12px;
-  line-height: 1.6;
-  color: var(--muted);
-  max-width: 170px;
-}
 .gesture-stage {
   position: relative;
   padding-top: 10px;
@@ -451,24 +520,24 @@
 }
 .tracking-frame {
   fill: none;
-  stroke: #8da46e66;
+  stroke: #6e84a466;
   stroke-width: 1;
 }
 .hand-landmarks {
-  stroke: #b7d691;
+  stroke: #91add6;
   stroke-width: 1;
   fill: none;
 }
 .hand-landmarks circle {
   fill: var(--accent);
-  stroke: #172010;
+  stroke: #101620;
   transition: cy 0.45s var(--ease);
 }
 .hand-landmarks polyline {
   transition: all 0.45s var(--ease);
 }
 .gesture-divider {
-  stroke: #394633;
+  stroke: #333b46;
 }
 .drawing-output {
   fill: none;
@@ -509,18 +578,18 @@
   font-size: 12px;
 }
 .visual-controls button[aria-pressed="true"] {
-  border-color: #9fb97d;
-  background: #c5f2770c;
+  border-color: #7d95b9;
+  background: #80aae90c;
   color: var(--accent);
 }
 .visual-controls button:hover {
   border-color: var(--accent);
 }
 .simulation-visual {
-  --border: #3a4434;
+  --border: #343a44;
 }
 .preview-simulation {
-  background: linear-gradient(135deg, #242d1d, #191e17) !important;
+  background: linear-gradient(135deg, #1d232d, #171a1e) !important;
 }
 .world-stage {
   display: grid;
@@ -535,7 +604,7 @@
   grid-template-columns: repeat(10, 1fr);
   gap: 3px;
   transform: skewY(-9deg);
-  border: 1px solid #546c39;
+  border: 1px solid #394d6c;
   padding: 8px;
   width: 100%;
   max-width: 250px;
@@ -543,23 +612,23 @@
 }
 .world-grid > span {
   aspect-ratio: 1;
-  border: 1px solid #49583b60;
-  background: #23301c;
+  border: 1px solid #3b475860;
+  background: #1c2430;
   display: grid;
   place-items: center;
   transition: background 0.5s;
 }
 .world-grid .entity {
-  background: #b3dd78;
-  box-shadow: 0 0 14px #afd87816;
+  background: #78a0dd;
+  box-shadow: 0 0 14px #789ed816;
 }
 .world-grid .entity i {
   width: 4px;
   height: 4px;
-  background: #3c5129;
+  background: #293951;
 }
 .world-grid .terrain {
-  background: #526b38;
+  background: #384c6b;
 }
 .world-branches {
   font-size: 9px;
@@ -574,7 +643,7 @@
   display: flex;
   flex-direction: column;
   gap: 27px;
-  border-left: 1px solid #68814c;
+  border-left: 1px solid #4c6181;
   padding-left: 15px;
 }
 .world-branches > div > span {
@@ -587,7 +656,7 @@
   width: 10px;
   top: 50%;
   left: -15px;
-  background: #68814c;
+  background: #4c6181;
 }
 .simulation-controls {
   display: flex;
@@ -608,7 +677,7 @@
   gap: 12px;
   min-height: 44px;
   padding: 8px 12px;
-  border: 1px solid #5b7044;
+  border: 1px solid #445670;
   background: transparent;
   font-size: 12px;
 }
@@ -617,7 +686,7 @@
   padding: 8px;
 }
 .simulation-controls button:hover {
-  background: #c5f2770d;
+  background: #80aae90d;
   border-color: var(--accent);
 }
 @keyframes bus-flow {
@@ -653,7 +722,7 @@
 }
 @keyframes patch-active {
   to {
-    fill: #71894410;
+    fill: #44608910;
   }
 }
 @keyframes drawing {
@@ -665,35 +734,6 @@
   100% {
     stroke-dashoffset: 0;
   }
-}
-.project-warcraft,
-.project-roomread {
-  --ink: inherit;
-  --muted: inherit;
-  --border: inherit;
-  --accent: inherit;
-  background: var(--panel);
-  border: 1px solid var(--border);
-}
-.project-warcraft .project-body,
-.project-roomread .project-body {
-  grid-column: 1;
-}
-.project-warcraft .project-visual,
-.project-roomread .project-visual {
-  grid-column: 2;
-}
-.project-warcraft .project-body h3 {
-  font-size: clamp(38px, 4.3vw, 58px);
-  max-width: 11ch;
-}
-.project-warcraft .project-technologies li,
-.project-roomread .project-technologies li {
-  color: var(--muted);
-}
-.project-warcraft :focus-visible,
-.project-roomread :focus-visible {
-  outline-color: var(--accent);
 }
 .roomread-visual {
   width: 100%;
@@ -720,11 +760,11 @@
   position: relative;
   border: 1px solid var(--border);
   padding: 18px;
-  background: #c5f27704;
+  background: #80aae904;
 }
 .roomread-phase:nth-child(2) {
-  border-color: #667d4b;
-  background: #c5f27709;
+  border-color: #4b5f7d;
+  background: #80aae909;
 }
 .roomread-phase-label.mono {
   display: flex;
@@ -830,8 +870,8 @@
 }
 .warcraft-loop .warcraft-game {
   grid-column: 1 / -1;
-  border-color: #667d4b;
-  background: #c5f27706;
+  border-color: #4b5f7d;
+  background: #80aae906;
   padding: 16px 10px;
 }
 .warcraft-game strong {
@@ -858,7 +898,7 @@
   grid-area: 2 / 2;
 }
 .warcraft-loop .warcraft-policy {
-  border-color: #667d4b;
+  border-color: #4b5f7d;
 }
 .warcraft-arrow {
   position: absolute;
@@ -920,34 +960,38 @@
 .warcraft-note {
   margin-top: 18px;
 }
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .project-visual {
+    transition: border-color 0.4s ease;
+  }
+  .project-showcase:hover .project-visual {
+    border-color: #527cff;
+  }
+
+}
 @media (max-width: 1100px) {
-  .project-flagship .project-body,
-  .project-case-study .project-body {
-    padding: 30px;
-  }
-  .project-flagship .project-visual {
-    padding: 25px;
-  }
-  .project-case-study .project-visual {
-    padding: 25px;
-  }
-  .project-flagship h3 {
-    font-size: 86px;
-  }
-  .project-case-study h3 {
-    font-size: 37px;
-  }
   .project-exhibits {
-    gap: 35px 28px;
+    gap: 76px 32px;
   }
-  .world-stage {
-    gap: 18px;
+  .project-case-study {
+    gap: 40px;
+  }
+  .project-flagship .project-body {
+    padding: 32px;
+  }
+  .project-flagship .project-visual,
+  .project-visual {
+    padding: 28px;
+  }
+  .project-medical {
+    gap: 0;
+  }
+  .project-medical .project-body {
+    padding: 32px;
   }
   .project-secondary .project-visual {
-    padding-inline: 18px;
-  }
-  .simulation-controls > span {
-    max-width: 80px;
+    padding: 20px;
   }
   .jarvis-context {
     margin-inline: 0;
@@ -956,244 +1000,160 @@
   .jarvis-context > div {
     font-size: 10px;
   }
+  .world-stage {
+    gap: 18px;
+  }
 }
 @media (max-width: 800px) {
+  .projects-section > .section-title-row {
+    margin-bottom: 76px;
+  }
   .project-flagship,
   .project-case-study {
     grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .project-case-study .project-body,
+  .project-case-study .project-visual {
+    grid-column: auto;
+    grid-row: auto;
+  }
+  .project-case-study .project-body {
+    padding-bottom: 30px;
+  }
+  .project-case-study .project-visual {
+    padding: 36px;
   }
   .project-flagship .project-visual {
     border-left: 0;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid #34486a;
+    padding: 40px;
   }
-  .project-flagship .project-visual,
-  .project-case-study .project-visual {
-    padding: 35px;
+  .project-medical .project-body {
+    padding: 36px;
   }
-  .project-case-study .project-body {
-    grid-column: 1;
-    grid-row: 1;
-  }
-  .project-case-study .project-visual {
-    grid-column: 1;
-    grid-row: 2;
-  }
-  .jarvis-visual,
-  .medical-visual {
-    max-width: 540px;
+  .project-visual > div {
     width: 100%;
+    max-width: 540px;
     margin-inline: auto;
   }
-  .project-case-study h3 {
+  .project-body h3 {
     font-size: 48px;
-    max-width: 490px;
+  }
+  .project-flagship h3 {
+    font-size: 105px;
+  }
+  .project-secondary .project-body h3 {
+    font-size: 31px;
   }
   .project-secondary .project-visual {
-    padding-inline: 15px;
+    padding: 18px;
   }
   .gesture-stage svg {
     height: 210px;
   }
   .world-stage {
-    height: 235px;
+    height: 245px;
     gap: 14px;
-    grid-template-columns: 1fr 45px;
+    grid-template-columns: 1fr 50px;
   }
   .world-grid {
     max-width: 190px;
   }
-  .project-secondary h3 {
-    font-size: 30px;
-  }
-  .project-meta {
-    font-size: 9px;
-  }
-  .visual-controls {
-    gap: 4px;
-  }
-  .visual-controls button {
-    font-size: 10px;
-  }
   .simulation-controls {
     flex-wrap: wrap;
-    gap: 6px;
+    gap: 8px;
   }
   .simulation-controls > span {
-    max-width: none;
     width: 100%;
+    max-width: none;
   }
-  .simulation-controls button {
-    flex: 1;
-  }
-  .simulation-controls button:last-child {
-    flex: 0;
-  }
-  .project-secondary .diagram-note {
-    font-size: 8px;
-  }
-  .project-secondary .visual-topline {
-    font-size: 8px;
+  .visual-controls button {
+    font-size: 11px;
   }
 }
 @media (max-width: 600px) {
+  .projects-section > .section-title-row { grid-template-columns: 1fr; }
+  .projects-section .section-heading h2 {
+    font-size: clamp(44px, 12vw, 66px);
+  }
+  .section-counter {
+    display: none;
+  }
   .project-exhibits {
     grid-template-columns: 1fr;
-    gap: 28px;
+    gap: 60px;
   }
   .project-flagship .project-body,
-  .project-case-study .project-body {
+  .project-medical .project-body {
     padding: 26px 22px;
   }
   .project-flagship .project-visual,
   .project-case-study .project-visual {
-    padding: 22px 16px;
+    padding: 26px 20px;
   }
   .project-flagship h3 {
     font-size: 83px;
-    margin-top: 25px;
+    margin-top: 28px;
   }
   .project-flagship .project-subtitle {
     font-size: 19px;
   }
-  .project-case-study h3 {
+  .project-body h3 {
     font-size: 38px;
-  }
-  .project-case-study .project-subtitle {
-    font-size: 16px;
-  }
-  .project-description {
-    font-size: 14px;
-  }
-  .project-technologies {
-    gap: 7px 14px;
-  }
-  .project-technologies li {
-    font-size: 10px;
   }
   .project-meta {
     font-size: 9px;
   }
-  .project-meta > span:first-child {
-    max-width: 210px;
+  .project-subtitle {
+    font-size: 17px;
+  }
+  .project-description {
+    font-size: 14px;
+    margin-bottom: 22px;
+  }
+  .project-technologies {
+    gap: 7px;
+  }
+  .project-technologies li {
+    padding: 3px 7px;
+  }
+  .project-details {
+    margin-top: 24px;
+  }
+.project-secondary .project-body h3 {
+    font-size: 34px;
+  }
+  .project-secondary .project-visual {
+    padding: 18px;
+    margin-bottom: 28px;
   }
   .jarvis-inputs {
     gap: 8px;
-    margin-top: 23px;
-  }
-  .jarvis-inputs .mono {
-    font-size: 7px;
+    margin-top: 24px;
   }
   .jarvis-inputs strong {
     font-size: 14px;
   }
   .jarvis-engine {
-    margin-inline: 4%;
+    margin-inline: 2%;
   }
   .jarvis-engine-name {
     font-size: 34px;
   }
   .jarvis-context {
-    padding-block: 17px;
+    flex-direction: column;
+    gap: 12px;
+    padding-block: 18px;
   }
-  .jarvis-context > div {
-    font-size: 10px;
-    gap: 5px;
-  }
-  .jarvis-context svg {
-    width: 13px;
-  }
-  .jarvis-output.mono {
+  .jarvis-output {
+    flex-wrap: wrap;
     gap: 8px;
-    font-size: 8px;
-  }
-  .waveform {
-    gap: 2px;
-  }
-  .waveform i {
-    width: 1px;
-  }
-  .ml-pipeline {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-  .ml-pipeline > div {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-  }
-  .ml-pipeline > div > span {
-    margin: 0;
-    font-size: 9px;
-  }
-  .ml-pipeline > svg {
-    display: none;
-  }
-  .ml-pipeline strong {
-    font-size: 12px;
-  }
-  .slice-caption.mono {
-    font-size: 8px;
-  }
-  .evaluation-lenses.mono {
-    font-size: 9px;
-  }
-  .project-secondary .project-visual {
-    padding: 0 16px 20px;
-    margin-bottom: 26px;
-  }
-  .project-secondary .project-body h3 {
-    font-size: 33px;
-  }
-  .gesture-stage svg {
-    height: 230px;
-  }
-  .world-stage {
-    height: 255px;
-    grid-template-columns: 1fr 54px;
-    gap: 18px;
-  }
-  .world-grid {
-    max-width: 210px;
-  }
-  .visual-controls button {
-    font-size: 11px;
-  }
-  .project-secondary .visual-topline {
-    font-size: 9px;
-  }
-  .simulation-controls {
-    flex-wrap: nowrap;
-  }
-  .simulation-controls > span {
-    width: auto;
-    max-width: 95px;
-  }
-  .simulation-controls button {
-    flex: none;
-    gap: 7px;
-    padding-inline: 9px;
-  }
-  .project-secondary .diagram-note.mono {
-    font-size: 9px;
-  }
-  .section-counter {
-    display: none;
-  }
-
-  .project-subtitle {
-    margin-bottom: 16px;
-  }
-  .project-description {
-    margin-bottom: 18px;
-  }
-  .project-details {
-    margin-top: 18px;
   }
   .jarvis-visual .visual-topline > span:last-child,
   .medical-visual .visual-topline > span:last-child,
   .gesture-svg-label,
-  .jarvis-output.mono .waveform,
+  .jarvis-output .waveform,
   .context-link {
     display: none;
   }
@@ -1202,8 +1162,6 @@
   .jarvis-context > div,
   .jarvis-output.mono,
   .diagram-note.mono,
-  .project-secondary .diagram-note.mono,
-  .project-secondary .visual-topline,
   .slice-caption.mono,
   .ml-pipeline > div > span,
   .evaluation-lenses.mono,
@@ -1212,18 +1170,22 @@
   .simulation-controls > span {
     font-size: 12px;
   }
-  .jarvis-inputs > div {
-    min-width: 0;
-  }
-  .jarvis-context {
-    flex-direction: column;
-    gap: 12px;
-  }
-  .jarvis-output.mono {
-    flex-wrap: wrap;
+  .ml-pipeline {
+    grid-template-columns: 1fr;
+    gap: 14px;
   }
   .ml-pipeline > div {
+    display: flex;
     flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .ml-pipeline > div > span {
+    margin: 0;
+  }
+  .ml-pipeline > svg {
+    display: none;
   }
   .ml-pipeline strong {
     font-size: 14px;
@@ -1231,18 +1193,25 @@
   .gesture-stage {
     padding-bottom: 34px;
   }
+  .gesture-stage svg {
+    height: 245px;
+  }
   .gesture-plane-label.mono {
     display: block;
     text-align: right;
-    font-size: 12px;
     color: var(--muted);
+    font-size: 12px;
   }
   .visual-controls button {
     font-size: 12px;
   }
   .world-stage {
+    height: 260px;
     grid-template-columns: 1fr 64px;
     gap: 14px;
+  }
+  .world-grid {
+    max-width: 215px;
   }
   .simulation-controls {
     flex-wrap: wrap;
@@ -1250,5 +1219,22 @@
   .simulation-controls > span {
     width: 100%;
     max-width: none;
+  }
+  .simulation-controls button {
+    gap: 8px;
+  }
+  .roomread-phase {
+    padding: 15px;
+  }
+  .roomread-steps strong {
+    font-size: 14px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .project-visual *,
+  .project-details summary > svg,
+  .skill-details summary > svg {
+    animation: none !important;
+    transition: none !important;
   }
 }

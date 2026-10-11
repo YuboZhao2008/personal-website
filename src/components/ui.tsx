@@ -26,7 +26,6 @@ export function Button({
   );
 }
 export function SectionHeading({
-  number,
   eyebrow,
   title,
   description,
@@ -38,10 +37,10 @@ export function SectionHeading({
 }) {
   return (
     <div className="section-heading">
-      <div className="eyebrow">
-        <span>{number} /</span> {eyebrow}
-      </div>
-      <h2>{title}</h2>
+      {eyebrow === "SELECTED SYSTEMS" && (
+        <p className="eyebrow">Selected projects</p>
+      )}
+      <h2 data-kinetic-heading>{title}</h2>
       {description && <p>{description}</p>}
     </div>
   );

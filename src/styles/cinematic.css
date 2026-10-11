@@ -1,0 +1,20 @@
+/* Cinematic foreground hierarchy: translucent reading surfaces over the persistent light field. */
+main, .footer { position:relative; z-index:1; }
+.hero { isolation:isolate; overflow:clip; overflow-clip-margin:12px; }
+.hero-main { gap:0; }
+.hero-art::before { background:radial-gradient(ellipse,#5f85ff30,transparent 68%); }
+.credentials-band { background:#0c152580; backdrop-filter:blur(12px); }
+.about-section { background:linear-gradient(120deg,#e9eef5f2,#d9e7f2db); }
+.honours-section { background:linear-gradient(120deg,#dbe7f6eb,#e9eef5f2); }
+.site-header { background:#080f1eae; backdrop-filter:blur(20px); }
+.site-header.is-scrolled { background:#080f1ee8; }
+.motion-dock { position:fixed; z-index:40; right:24px; bottom:22px; padding:0 16px; border:1px solid #6b86b766; border-radius:999px; background:#0b1425de; backdrop-filter:blur(16px); box-shadow:0 8px 30px #04091840; }
+.motion-dock .motion-control { color:#c8dbff; font-size:12px; padding:0; min-height:42px; }
+.footer { padding-bottom:86px; }
+@media(max-width:600px) {
+ .hero-name-line { transform-origin:left center; }
+ .motion-dock { right:12px; bottom:12px; padding:0 14px; }
+ .motion-dock .motion-control { font-size:12px; }
+ .footer { padding-bottom:80px; }
+}
+@media(prefers-reduced-transparency:reduce) { .about-section,.honours-section { background:#e9eef5; } .site-header,.motion-dock { background:#080f1e; backdrop-filter:none; } }

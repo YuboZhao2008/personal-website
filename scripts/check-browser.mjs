@@ -8,7 +8,11 @@ import { site } from "../src/data/site.ts";
 
 const require = createRequire(import.meta.url);
 const baseURL = process.env.BASE_URL || "http://127.0.0.1:3000";
-const widths = [320, 375, 390, 430, 600, 768, 800, 1024, 1280, 1440, 1920];
+const widths = process.env.BROWSER_VIEWPORTS === "none"
+  ? []
+  : process.env.BROWSER_VIEWPORTS
+    ? process.env.BROWSER_VIEWPORTS.split(",").map(Number)
+    : [320, 375, 390, 430, 600, 768, 800, 1024, 1280, 1440, 1920];
 const report = {
   viewports: [],
   consoleErrors: [],
@@ -178,75 +182,31 @@ async function roboticsContent(page) {
       "Robotics content extends outside its column",
     );
 }
+async function openProjectRecords(page) {
+  await page.locator(".gallery-record").evaluateAll((records) => records.forEach((record) => { record.open = true; }));
+}
+async function diagramBounds(card, width) {
+  for (const figure of await card.locator("figure").all()) {
+    assert(await figure.evaluate((el) => {
+      const bounds = el.getBoundingClientRect();
+      return [...el.querySelectorAll("*")].every((node) => {
+        const r = node.getBoundingClientRect();
+        return r.width === 0 || (r.left >= bounds.left - 1 && r.right <= bounds.right + 1 && r.top >= bounds.top - 1 && r.bottom <= bounds.bottom + 1);
+      });
+    }), `Diagram bounds at ${width}px`);
+  }
+}
 async function warcraftLayout(page, width) {
   const card = page.locator("#project-warcraft-rl");
   assert.equal(await card.count(), 1);
-  assert(
-    await card
-      .getByRole("heading", { name: "Warcraft III RL Agent", exact: true })
-      .isVisible(),
-  );
   assert.equal(await card.locator(".warcraft-visual").count(), 1);
-  assert.equal(
-    await card.locator(".simulation-visual, .project-link").count(),
-    0,
-  );
+  assert.equal(await card.locator(".simulation-visual, .project-link").count(), 0);
   const text = await card.locator("figure").innerText();
-  for (const label of [
-    "Lua state",
-    "IPC bridge",
-    "Python RL",
-    "PPO policy",
-    "Action queue",
-    "Lua controller",
-    "OBSERVATIONS",
-    "ACTIONS",
-    "Learned policies in development",
-  ])
+  for (const label of ["Lua state", "IPC bridge", "Python RL", "PPO policy", "Action queue", "Lua controller", "OBSERVATIONS", "ACTIONS", "Learned policies in development"])
     assert(text.includes(label), `Missing Warcraft label: ${label}`);
-  assert(
-    await card.evaluate((el) => {
-      const cardBounds = el.getBoundingClientRect();
-      const figure = el.querySelector("figure");
-      const bounds = figure.getBoundingClientRect();
-      return (
-        bounds.left >= cardBounds.left &&
-        bounds.right <= cardBounds.right &&
-        [...figure.querySelectorAll("*")].every((node) => {
-          const r = node.getBoundingClientRect();
-          return (
-            r.left >= bounds.left - 1 &&
-            r.right <= bounds.right + 1 &&
-            r.top >= bounds.top - 1 &&
-            r.bottom <= bounds.bottom + 1
-          );
-        })
-      );
-    }),
-    `Warcraft diagram bounds at ${width}px`,
-  );
-  for (const label of await card
-    .locator("figure strong, figure span, dt, dd, figcaption, .warcraft-note")
-    .all())
-    assert(
-      await label.evaluate(
-        (el) => parseFloat(getComputedStyle(el).fontSize) >= 12,
-      ),
-      "Warcraft label below 12px",
-    );
-  if (width <= 800) {
-    const body = await card.locator(".project-body").boundingBox();
-    const visual = await card.locator(".project-visual").boundingBox();
-    assert(
-      visual.y >= body.y + body.height - 1,
-      "Warcraft must stack below its copy",
-    );
-  }
-  assert(
-    (await page.locator("#projects .section-counter").textContent()).includes(
-      `01 — ${String(profile.projects.length).padStart(2, "0")}`,
-    ),
-  );
+  await diagramBounds(card, width);
+  for (const label of await card.locator("figure strong, figure span, dt, dd, figcaption, .warcraft-note").all())
+    assert(await label.evaluate((el) => parseFloat(getComputedStyle(el).fontSize) >= 12), "Warcraft label below 12px");
 }
 async function focused(locator) {
   assert(
@@ -261,75 +221,31 @@ async function focused(locator) {
   );
 }
 async function roomreadLayout(page, width) {
-  const expectedOrder = ["jarvis", "roomread", "warcraft-rl", "brain-tumor", "gesture", "future-sim"];
   assert.equal(profile.projects.length, 6);
-  assert.deepEqual(
-    await page.locator(".project-showcase").evaluateAll((cards) => cards.map((card) => card.id)),
-    expectedOrder.map((id) => `project-${id}`),
-  );
-  assert.equal(await page.locator('.project-flagship').count(), 1);
-  assert.equal(await page.locator("#project-future-sim").count(), 1);
-  assert((await page.locator("#projects .section-counter").textContent()).includes("01 — 06"));
-  for (let i = 0; i < expectedOrder.length; i++)
-    assert.equal(
-      await page.locator(`#project-${expectedOrder[i]} .project-meta > span:last-child`).innerText(),
-      `${String(i + 1).padStart(2, "0")} /`,
-    );
+  assert.deepEqual(await page.locator(".gallery-record").evaluateAll((records) => records.map((record) => record.id)), profile.projects.map((project) => `project-${project.id}`));
+  for (const project of profile.projects) {
+    const rendered = page.locator(`#project-${project.id}`);
+    assert.equal(await rendered.locator("summary h3").innerText(), project.title);
+    assert.equal(await rendered.locator(".project-description").innerText(), project.description);
+    assert.equal(await rendered.locator(".project-subtitle").innerText(), project.subtitle);
+    assert.deepEqual(await rendered.locator(".project-technologies li").allTextContents(), project.technologies);
+    assert.deepEqual(await rendered.locator(".project-details li").allTextContents(), project.details);
+  }
   const card = page.locator("#project-roomread");
-  assert(await card.getByRole("heading", { name: "RoomRead", exact: true }).isVisible());
   assert.equal(await card.locator(".preview-roomread .roomread-visual").count(), 1);
   assert.equal(await card.locator(".simulation-visual, .warcraft-visual, .medical-visual, .jarvis-visual, .gesture-visual, .project-link, a").count(), 0);
-  assert.deepEqual(await card.locator(".roomread-steps strong").allTextContents(), [
-    "Sources", "Discovery", "Content / transcripts", "Chunks", "Observations",
-    "Validation", "Evidence", "Claims", "Decision profile", "Pitch analysis",
-  ]);
+  assert.deepEqual(await card.locator(".roomread-steps strong").allTextContents(), ["Sources", "Discovery", "Content / transcripts", "Chunks", "Observations", "Validation", "Evidence", "Claims", "Decision profile", "Pitch analysis"]);
   for (const label of await card.locator("figure strong, figure p, figure span, figcaption").all())
     assert(await label.evaluate((el) => parseFloat(getComputedStyle(el).fontSize) >= 12), "RoomRead label below 12px");
-  assert(await card.evaluate((el) => {
-    const figure = el.querySelector("figure");
-    const bounds = figure.getBoundingClientRect();
-    const cardBounds = el.getBoundingClientRect();
-    return bounds.left >= cardBounds.left && bounds.right <= cardBounds.right &&
-      [...figure.querySelectorAll("*")].every((node) => {
-        const r = node.getBoundingClientRect();
-        return r.left >= bounds.left - 1 && r.right <= bounds.right + 1 &&
-          r.top >= bounds.top - 1 && r.bottom <= bounds.bottom + 1;
-      });
-  }), `RoomRead diagram bounds at ${width}px`);
-  const body = await card.locator(".project-body").boundingBox();
-  const visual = await card.locator(".project-visual").boundingBox();
-  if (width <= 800)
-    assert(visual.y >= body.y + body.height - 1, "RoomRead must stack below its copy");
-  else
-    assert(visual.x >= body.x + body.width - 1, "RoomRead desktop columns");
-  const bounds = await card.boundingBox();
-  const exhibits = await page.locator(".project-exhibits").boundingBox();
-  assert(Math.abs(bounds.width - exhibits.width) < 2, "RoomRead must be full-width");
-  const warcraft = await page.locator("#project-warcraft-rl").boundingBox();
-  const medical = await page.locator("#project-brain-tumor").boundingBox();
-  assert(warcraft.y > bounds.y + bounds.height && medical.y > warcraft.y + warcraft.height, "Case-study spacing");
+  await diagramBounds(card, width);
 }
-async function secondaryLayout(page, width) {
-  const gesture = page.locator("#project-gesture.project-secondary");
-  const future = page.locator("#project-future-sim.project-secondary");
+async function secondaryLayout(page) {
+  const gesture = page.locator("#project-gesture");
+  const future = page.locator("#project-future-sim");
   assert.equal(await gesture.count(), 1);
   assert.equal(await future.count(), 1);
-  assert.equal(await page.locator(".project-secondary").count(), 2);
-  assert(await future.getByRole("heading", { name: "Future-Sim", exact: true }).isVisible());
   assert.equal(await future.locator(".preview-simulation .simulation-visual").count(), 1);
   assert.equal(await future.locator(".world-grid > span").count(), 80);
-  const gestureBounds = await gesture.boundingBox();
-  const futureBounds = await future.boundingBox();
-  const exhibits = await page.locator(".project-exhibits").boundingBox();
-  if (width > 600) {
-    assert(Math.abs(gestureBounds.y - futureBounds.y) < 2, "Secondary projects share a desktop row");
-    assert(futureBounds.x > gestureBounds.x + gestureBounds.width, "Secondary columns do not overlap");
-    assert(gestureBounds.width < exhibits.width / 2 && futureBounds.width < exhibits.width / 2, "Secondary projects remain compact");
-  } else {
-    assert(futureBounds.y > gestureBounds.y + gestureBounds.height, "Secondary projects stack on mobile");
-    assert(Math.abs(futureBounds.x - gestureBounds.x) < 2, "Secondary mobile alignment");
-    assert(Math.abs(gestureBounds.width - exhibits.width) < 2 && Math.abs(futureBounds.width - exhibits.width) < 2, "Secondary projects fill the mobile column");
-  }
   const grid = await future.locator(".world-grid").boundingBox();
   const controls = await future.locator(".simulation-controls").boundingBox();
   assert(grid.y + grid.height <= controls.y, "World grid does not overlap controls");
@@ -418,6 +334,7 @@ async function mobileKeyboardNavigation(page, width) {
     await page.screenshot({ path: "test-results/mobile-menu-390.png" });
   await page.keyboard.press("Escape");
   await dialog.waitFor({ state: "hidden" });
+  await page.waitForFunction(() => document.querySelector('[aria-label="Open navigation"]').getAttribute("aria-expanded") === "false");
   assert.equal(await trigger.getAttribute("aria-expanded"), "false");
   await focused(trigger);
   // Activate every destination with the keyboard, without a mouse/focus shortcut.
@@ -429,6 +346,7 @@ async function mobileKeyboardNavigation(page, width) {
     await focused(links.nth(i));
     await page.keyboard.press("Enter");
     await dialog.waitFor({ state: "hidden" });
+    await page.waitForFunction(() => document.querySelector('[aria-label="Open navigation"]').getAttribute("aria-expanded") === "false");
     assert.equal(await trigger.getAttribute("aria-expanded"), "false");
     assert(
       await page
@@ -485,12 +403,13 @@ try {
     const response = await page.goto(baseURL, { waitUntil: "networkidle" });
     assert.equal(response.status(), 200);
     assert.equal(await page.locator("h1").count(), 1);
-    assert.equal(await page.locator("main > section").count(), 7);
+    assert.equal(await page.locator("main > section").count(), 8);
     assert.equal(
-      await page.locator(".project-showcase").count(),
+      await page.locator(".gallery-record").count(),
       profile.projects.length,
     );
     await noOverflow(page, width + "px initial");
+    await openProjectRecords(page);
     await warcraftLayout(page, width);
     await roomreadLayout(page, width);
     await secondaryLayout(page, width);
@@ -561,16 +480,12 @@ try {
         if (i < navigation.length - 1) await page.keyboard.press("Tab");
       }
     }
-    // Every visualization control works without a mouse.
-    for (const name of ["Vision / ML", "Robotics", "Research", "Agents"]) {
-      const selector = page
-        .getByRole("group", { name: "Explore engineering focus" })
-        .getByRole("button", { name, exact: false });
-      await selector.focus();
-      await page.keyboard.press("Enter");
-      assert.equal(await selector.getAttribute("aria-pressed"), "true");
-      await noOverflow(page, width + "px " + name);
-    }
+    // The new hero is decorative; its static rendering must survive reduced motion.
+    assert.equal(await page.locator(".hero-scene[role='img']").count(), 1);
+    assert(await page.locator(".hero-scene-fallback").isVisible());
+    assert.equal(await page.locator(".hero-scene canvas").count(), 0);
+    assert.equal(await page.locator(".hero-scene").getAttribute("data-scene-running"), "false");
+    // Every project visualization control still works without a mouse.
     for (const name of ["Open hand", "Closed hand", "Pointing"]) {
       const selector = page
         .getByRole("group", { name: "Explore gesture landmarks" })
@@ -595,7 +510,8 @@ try {
     await focused(reset);
     assert((await page.locator(".simulation-visual .visual-topline").textContent()).includes("t = 0"));
 
-    const disclosures = page.locator(".project-details, .skill-details");
+    await page.locator(".gallery-record").evaluateAll((records) => records.forEach((record) => { record.open = false; }));
+    const disclosures = page.locator(".gallery-record, .skill-details");
     for (let i = 0; i < (await disclosures.count()); i++) {
       await disclosures.nth(i).locator("summary").focus();
       await page.keyboard.press("Enter");
@@ -717,11 +633,14 @@ try {
   });
   observeErrors(page);
   await page.goto(baseURL, { waitUntil: "networkidle" });
-  await page.waitForFunction(() =>
-    document.getAnimations().some((a) => a.playState === "running"),
-  );
+  await openProjectRecords(page);
+  await page.waitForFunction(() => document.querySelector(".hero-scene")?.dataset.sceneRunning === "true");
+  await page.locator(".hero-scene canvas").waitFor();
   await page.getByRole("button", { name: "Pause ambient motion" }).click();
   await stableFrames(page);
+  await page.waitForFunction(() => document.querySelector(".hero-scene")?.dataset.sceneRunning === "false");
+  // Allow an in-flight finite hover/fallback fade to settle after pausing ambient motion.
+  await page.waitForFunction(() => !document.getAnimations().some((animation) => animation.playState === "running"));
   assert.equal(
     await page.evaluate(
       () =>
@@ -731,11 +650,10 @@ try {
     0,
   );
   await page.getByRole("button", { name: "Resume ambient motion" }).click();
-  await page.waitForFunction(() =>
-    document.getAnimations().some((a) => a.playState === "running"),
-  );
+  await page.waitForFunction(() => document.querySelector(".hero-scene")?.dataset.sceneRunning === "true");
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.getByRole("button", { name: "Reduced motion enabled" }).waitFor();
+  await page.locator(".hero-scene canvas").waitFor({ state: "detached" });
   assert.equal(
     await page.evaluate(
       () =>
@@ -745,36 +663,31 @@ try {
     0,
   );
   await page.emulateMedia({ reducedMotion: "no-preference" });
-  const target = page
-    .getByRole("group", { name: "Explore engineering focus" })
-    .getByRole("button", { name: "Research" });
+  const target = page.locator('.hero-actions a[href="#projects"]');
   const beforeHover = await target.evaluate(
     (el) => getComputedStyle(el).backgroundColor,
   );
   await target.hover();
   await page.waitForFunction(
     ({ before }) =>
-      getComputedStyle(
-        [...document.querySelectorAll(".system-selectors button")].at(-1),
-      ).backgroundColor !== before,
+      getComputedStyle(document.querySelector('.hero-actions a[href="#projects"]')).backgroundColor !== before,
     { before: beforeHover },
-  );
-  await target.click();
-  assert(
-    (await page.locator(".system-readout").textContent()).includes(
-      "From sources to decisions.",
-    ),
   );
   await page.locator("#projects").scrollIntoViewIfNeeded();
   await page.waitForFunction(
-    () => document.querySelector(".hero-art").dataset.visible === "false",
+    () => document.querySelector(".hero-scene").dataset.sceneRunning === "false",
   );
-  assert.equal(
-    await page
-      .locator(".field-trace")
-      .evaluate((el) => getComputedStyle(el).animationPlayState),
-    "paused",
-  );
+  report.checks.push("Hero: deferred WebGL, static reduced-motion fallback, global pause/resume, offscreen rendering pause, pointer feedback");
+
+  const projectSurface = page.locator("#project-jarvis .project-visual");
+  await projectSurface.scrollIntoViewIfNeeded();
+  const restingSurface = await projectSurface.evaluate((element) => getComputedStyle(element).transform);
+  await projectSurface.hover({ position: { x: 40, y: 40 } });
+  await page.waitForFunction((resting) => getComputedStyle(document.querySelector("#project-jarvis .project-visual")).transform !== resting, restingSurface);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.waitForFunction((resting) => getComputedStyle(document.querySelector("#project-jarvis .project-visual")).transform === resting, restingSurface);
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  report.checks.push("Project surfaces: spring pointer response, immediate neutralization when reduced motion is enabled");
 
   await page.locator("#project-warcraft-rl").scrollIntoViewIfNeeded();
   const warcraftSignal = page.locator(".warcraft-signal").first();
@@ -1019,6 +932,7 @@ try {
     .getByRole("link", { name: "Projects", exact: true })
     .tap();
   assert(touch.url().endsWith("#projects"));
+  await touch.locator("#project-gesture > summary").tap();
   await touch.getByRole("button", { name: "Open hand", exact: true }).tap();
   assert.equal(
     await touch
@@ -1047,14 +961,18 @@ try {
   });
   observeErrors(noJS, { scriptsDisabled: true });
   await noJS.goto(baseURL);
+  await openProjectRecords(noJS);
+  assert(await noJS.locator(".hero-scene-fallback").isVisible());
+  assert.equal(await noJS.locator(".hero-scene canvas").count(), 0);
   assert.equal(
-    await noJS.locator(".project-showcase").count(),
+    await noJS.locator(".gallery-record").count(),
     profile.projects.length,
   );
-  await noJS.locator(".project-details").first().locator("summary").click();
+  await noJS.locator(".gallery-record").first().locator("summary").click();
+  await noJS.locator(".gallery-record").first().locator("summary").click();
   assert(
     await noJS
-      .locator(".project-details")
+      .locator(".gallery-record")
       .first()
       .evaluate((el) => el.open),
   );
@@ -1062,13 +980,15 @@ try {
   await warcraftLayout(noJS, 390);
   await roomreadLayout(noJS, 390);
   await secondaryLayout(noJS, 390);
-  const roomreadNotes = noJS.locator("#project-roomread .project-details");
+  const roomreadNotes = noJS.locator("#project-roomread");
+  await roomreadNotes.locator("summary").click();
   await roomreadNotes.locator("summary").click();
   assert(await roomreadNotes.evaluate((el) => el.open));
   assert((await roomreadNotes.innerText()).includes("evidence-fit gates"));
   assert((await noJS.locator("#project-roomread .project-description").innerText()).includes("structured decision-maker profiles"));
   await roboticsContent(noJS);
-  const warcraftNotes = noJS.locator("#project-warcraft-rl .project-details");
+  const warcraftNotes = noJS.locator("#project-warcraft-rl");
+  await warcraftNotes.locator("summary").click();
   await warcraftNotes.locator("summary").click();
   assert(await warcraftNotes.evaluate((el) => el.open));
   assert((await warcraftNotes.innerText()).includes("bidirectional IPC"));
@@ -1083,6 +1003,16 @@ try {
     "server-rendered content and native disclosures without JavaScript",
     "robotics: three consecutive FTC qualifications, 2024 second-place team result, VEX IQ Robotics Skills first-place team result, Middle School Division, Dallas, Grade 8, readable labels and column bounds",
   );
+
+  const noWebGL = await browser.newPage({ viewport: { width: 1440, height: 1000 }, reducedMotion: "no-preference" });
+  observeErrors(noWebGL);
+  await noWebGL.addInitScript(() => Object.defineProperty(window, "WebGL2RenderingContext", { value: undefined }));
+  await noWebGL.goto(baseURL, { waitUntil: "networkidle" });
+  assert(await noWebGL.locator(".hero-scene-fallback").isVisible());
+  assert.equal(await noWebGL.locator(".hero-scene canvas").count(), 0);
+  assert.equal(await noWebGL.locator(".gallery-record").count(), profile.projects.length);
+  report.checks.push("WebGL unavailable: static hero remains visible, no canvas attempted, portfolio content intact");
+  await noWebGL.close();
 
   assert.deepEqual(report.consoleErrors, []);
   assert.deepEqual(report.requestFailures, []);

@@ -1,0 +1,142 @@
+/* The light field is one contained background surface; content retains its own stacking layer. */
+.ambient-field {
+  --atmosphere-primary: #416dff;
+  --atmosphere-secondary: #2ccbb8;
+  --atmosphere-highlight: #a9cfff;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+  background: #080f1e;
+  isolation: isolate;
+}
+.ambient-field::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 48% 43%, #080f1e99 12%, #080f1e33 56%, transparent 84%);
+}
+.atmosphere-scroll-plane {
+  position: absolute;
+  inset: -12% -10%;
+  transform-origin: center center;
+}
+.atmosphere-ribbon {
+  position: absolute;
+  width: 110%;
+  height: 105%;
+  transform-origin: center center;
+  will-change: transform;
+  animation-play-state: paused;
+}
+.atmosphere-ribbon-primary {
+  left: -18%;
+  top: -30%;
+  background: radial-gradient(ellipse at 48% 48%, transparent 29%, color-mix(in srgb, var(--atmosphere-primary) 62%, transparent) 43%, color-mix(in srgb, var(--atmosphere-primary) 20%, transparent) 51%, transparent 65%);
+  animation: aurora-primary 18s ease-in-out infinite alternate;
+}
+.atmosphere-ribbon-secondary {
+  left: 20%;
+  top: 22%;
+  opacity: 0.8;
+  background: radial-gradient(ellipse at 52% 52%, transparent 28%, color-mix(in srgb, var(--atmosphere-secondary) 48%, transparent) 42%, color-mix(in srgb, var(--atmosphere-secondary) 10%, transparent) 52%, transparent 63%);
+  animation: aurora-secondary 22s ease-in-out infinite alternate;
+  animation-delay: -9s;
+}
+.atmosphere-ribbon-ice {
+  width: 80%;
+  height: 75%;
+  left: -30%;
+  top: 46%;
+  opacity: 0.48;
+  background: radial-gradient(ellipse at 50% 50%, transparent 30%, color-mix(in srgb, var(--atmosphere-highlight) 48%, transparent) 43%, transparent 61%);
+  animation: aurora-ice 15s ease-in-out infinite alternate;
+  animation-delay: -4s;
+}
+.atmosphere-energy {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: radial-gradient(ellipse at 100% 48%, color-mix(in srgb, var(--atmosphere-primary) 45%, transparent), transparent 60%);
+}
+.atmosphere-particles {
+  position: absolute;
+  inset: 0;
+}
+.atmosphere-particles i {
+  position: absolute;
+  display: block;
+  left: var(--particle-x);
+  top: var(--particle-y);
+  width: var(--particle-size);
+  height: var(--particle-size);
+  border-radius: 50%;
+  background: #d2e5ff;
+  box-shadow: 0 0 8px #9ebfff80;
+  animation: field-particle var(--particle-duration) linear var(--particle-delay) infinite;
+  opacity: 0.4;
+}
+.atmosphere-particles i:nth-child(3n) {
+  background: #78d6d4;
+  box-shadow: 0 0 6px #5ed5bc66;
+}
+.atmosphere-grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.12;
+  mix-blend-mode: soft-light;
+}
+.ambient-field[data-running="false"] .atmosphere-ribbon,
+.ambient-field[data-running="false"] .atmosphere-particles i,
+html[data-motion="paused"] .ambient-field * {
+  animation-play-state: paused !important;
+}
+.ambient-field[data-running="true"] .atmosphere-ribbon,
+.ambient-field[data-running="true"] .atmosphere-particles i {
+  animation-play-state: running;
+}
+@keyframes aurora-primary {
+  from { transform: translate3d(-7%, -5%, 0) rotate(-26deg) scale(1.02, 0.82); }
+  50% { transform: translate3d(5%, 12%, 0) rotate(-10deg) scale(1.13, 0.96); }
+  to { transform: translate3d(16%, 2%, 0) rotate(8deg) scale(0.98, 0.75); }
+}
+@keyframes aurora-secondary {
+  from { transform: translate3d(5%, -7%, 0) rotate(18deg) scale(1.05, 0.82); }
+  50% { transform: translate3d(-12%, 8%, 0) rotate(-6deg) scale(1.13, 0.95); }
+  to { transform: translate3d(-20%, -12%, 0) rotate(-18deg) scale(1.02, 0.82); }
+}
+@keyframes aurora-ice {
+  from { transform: translate3d(-6%, 4%, 0) rotate(-30deg) scale(1, 0.6); }
+  to { transform: translate3d(18%, -21%, 0) rotate(12deg) scale(1.12, 0.88); }
+}
+@keyframes field-particle {
+  0% { transform: translate3d(0, 48px, 0); opacity: 0; }
+  18% { opacity: 0.6; }
+  75% { opacity: 0.45; }
+  100% { transform: translate3d(40px, -105px, 0); opacity: 0; }
+}
+@media (max-width: 700px) {
+  .atmosphere-ribbon-primary { width: 150%; left: -45%; }
+  .atmosphere-ribbon-secondary { width: 150%; left: -8%; opacity: 0.65; }
+  .atmosphere-ribbon-ice { display: none; }
+  .atmosphere-particles i:nth-child(n+13) { display: none; }
+  .atmosphere-grain { display: none; }
+  .ambient-field::after { background: radial-gradient(ellipse at 50% 40%, #080f1e99, #080f1e44 78%, transparent); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .atmosphere-ribbon,
+  .atmosphere-particles i { animation: none !important; }
+  .atmosphere-ribbon-primary { transform: rotate(-20deg) scale(1.04, 0.8); }
+  .atmosphere-ribbon-secondary { transform: rotate(12deg) scale(1.04, 0.8); }
+  .atmosphere-particles { opacity: 0.4; }
+  .atmosphere-scroll-plane { transform: none !important; }
+}
+
+/* A hidden tab must suspend CSS loops as well as the JavaScript animation controllers. */
+html[data-page-hidden="true"] *,
+html[data-page-hidden="true"] *::before,
+html[data-page-hidden="true"] *::after {
+  animation-play-state: paused !important;
+}

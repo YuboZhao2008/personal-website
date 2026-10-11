@@ -1,90 +1,118 @@
-/* Open editorial layouts replace the previous uniform card sections. */
+/* Editorial content: light profile, dark experience, and a silver honours ledger. */
 .about-section {
+  --ink: #132039;
+  --muted: #526078;
+  --accent: #315de8;
+  --border: #13203926;
+  background: var(--paper, #e9eef5);
+  color: var(--ink);
+  position: relative;
+}
+.about-layout {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 100px;
-  border-bottom: 1px solid var(--border);
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: clamp(48px, 8vw, 130px);
 }
 .about-section h2 {
-  max-width: 530px;
+  max-width: 560px;
+}
+.about-coordinate {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  color: var(--muted);
+  font-size: 10px;
+  margin: 32px 0 64px;
+}
+.about-coordinate span {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+.about-coordinate span::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  background: var(--accent);
+  border-radius: 50%;
 }
 .education-record {
   display: flex;
   flex-direction: column;
-  gap: 9px;
-  border-left: 2px solid var(--accent);
-  padding: 2px 0 2px 20px;
-  margin-top: 38px;
+  gap: 10px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
 }
 .education-record > .mono {
   color: var(--muted);
-  font-size: 9px;
+  font-size: 11px;
 }
 .education-record > strong {
-  font-size: 15px;
-  font-weight: 400;
+  font-size: 18px;
+  font-weight: 500;
   line-height: 1.5;
 }
 .education-record > span:last-child {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 14px;
 }
 .about-content {
-  padding-top: 43px;
+  padding-top: 8px;
 }
 .about-content > p {
   color: var(--muted);
   font-size: 16px;
-  line-height: 1.85;
-  margin-bottom: 24px;
+  line-height: 1.9;
+  margin: 28px 0;
 }
 .about-content > .large-body {
   color: var(--ink);
-  font-size: 25px;
-  letter-spacing: -0.03em;
-  line-height: 1.5;
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(25px, 2.6vw, 39px);
+  letter-spacing: -0.045em;
+  line-height: 1.35;
+  margin-top: 0;
 }
 .about-content .text-link {
-  margin-top: 3px;
+  margin-top: 16px;
   color: var(--accent);
 }
 .experience-section {
-  padding-bottom: 0;
+  padding-bottom: 64px;
 }
 .experience-list {
   border-top: 1px solid var(--border);
 }
 .experience-entry {
   display: grid;
-  grid-template-columns: 110px 0.95fr 1.1fr;
-  gap: 48px;
-  padding-block: 52px;
+  grid-template-columns: 110px 0.9fr 1.1fr;
+  gap: clamp(24px, 4.5vw, 72px);
+  padding: 64px 0;
   border-bottom: 1px solid var(--border);
   scroll-margin-top: 108px;
 }
 .experience-year {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 15px;
   color: var(--muted);
 }
 .experience-year > span:first-child {
   color: var(--ink);
-  font-size: 19px;
-  letter-spacing: -0.05em;
+  font-size: 20px;
+  letter-spacing: -0.04em;
 }
 .experience-year > span:last-child {
-  font-size: 9px;
+  font-size: 10px;
   line-height: 1.8;
-  max-width: 100px;
 }
 .experience-display {
-  color: var(--ink);
-  font-size: clamp(45px, 4.1vw, 65px);
-  line-height: 0.92;
-  letter-spacing: -0.065em;
-  margin-bottom: 29px;
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(44px, 4.6vw, 70px);
   font-weight: 500;
+  letter-spacing: -0.065em;
+  line-height: 0.97;
+  margin-bottom: 28px;
 }
 .experience-display > span {
   color: var(--accent);
@@ -98,126 +126,117 @@
   letter-spacing: 0.05em;
 }
 .experience-identity h3 {
-  font-size: 20px;
-  font-weight: 400;
-  line-height: 1.35;
-  letter-spacing: -0.025em;
+  font-family: var(--font-display), sans-serif;
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: -0.035em;
   max-width: 350px;
-  margin: 0 0 10px;
+  margin: 0 0 12px;
 }
 .experience-role {
   color: var(--muted);
-  font-size: 13px;
+  font-size: 14px;
   margin: 0;
-  line-height: 1.65;
+  line-height: 1.7;
 }
 .experience-location {
   color: var(--muted);
-  font-size: 10px;
+  font-size: 11px;
   line-height: 1.8;
-  margin-top: 14px;
-}
-.experience-copy {
-  padding-top: 0;
+  margin-top: 16px;
 }
 .experience-copy > .experience-statement {
-  font-size: 23px;
-  line-height: 1.4;
-  letter-spacing: -0.035em;
+  font-family: var(--font-display), sans-serif;
+  font-size: 27px;
+  line-height: 1.35;
+  letter-spacing: -0.04em;
   color: var(--ink);
-  margin-bottom: 17px;
-  max-width: 410px;
+  margin: 0 0 22px;
 }
 .experience-copy > p {
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.9;
   color: var(--muted);
   max-width: 57ch;
 }
 .discipline-list {
   list-style: none;
-  padding: 14px 0 0;
+  padding: 18px 0 0;
   display: flex;
   flex-wrap: wrap;
-  gap: 9px 20px;
+  gap: 10px 22px;
   margin: 0;
 }
 .discipline-list li {
-  font: 10px/1.8 var(--mono);
-  color: #c5cbbd;
+  font: 11px/1.8 var(--mono);
+  color: var(--ink);
 }
 .discipline-list li::before {
   content: "/";
-  color: #758a59;
+  color: var(--accent);
   margin-right: 8px;
 }
-.ftc-result {
-  margin-bottom: 26px;
-}
 .ftc-result > span:first-child {
-  font-size: 139px;
-  line-height: 0.86;
-  letter-spacing: -0.065em;
+  font-size: 138px;
+  line-height: 0.88;
+  letter-spacing: -0.07em;
   display: block;
 }
 .ftc-result > .world-label {
   display: block;
-  font-size: 16px;
-  line-height: 1.5;
+  font-size: 13px;
+  line-height: 1.6;
   max-width: 28ch;
-  color: var(--ink);
+  color: var(--muted);
   letter-spacing: 0.08em;
-  margin-top: 14px;
+  margin-top: 20px;
 }
 .experience-ftc .experience-year > span:first-child {
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: 15px;
+  line-height: 1.6;
   letter-spacing: 0;
-  max-width: 14ch;
 }
 .experience-copy > .experience-result-detail {
-  color: var(--accent);
+  color: #b8caff;
   font-size: 18px;
   line-height: 1.5;
-  margin-bottom: 18px;
-}
-.experience-ftc .experience-copy {
-  padding-top: 15px;
+  margin-bottom: 20px;
 }
 .quant-mark {
-  margin-bottom: 23px;
+  margin-bottom: 24px;
 }
 .quant-mark > span:first-child {
   font:
-    italic 58px Georgia,
-    serif;
-  color: #b9caab;
-  letter-spacing: -0.06em;
+    64px/1 var(--font-display),
+    sans-serif;
+  color: var(--accent);
+  letter-spacing: -0.065em;
 }
 .quant-mark svg {
   width: 100%;
   max-width: 300px;
   height: 65px;
   display: block;
-  margin-top: -13px;
+  margin-top: 8px;
   fill: none;
-  stroke: #4e5b42;
+  stroke: #354769;
 }
 .quant-mark .quant-signal {
-  stroke: #a9c77f;
+  stroke: #9ae7ed;
   stroke-dasharray: 420;
   animation: signal-line 12s ease-in-out infinite;
 }
 .quant-mark > .mono {
   color: var(--muted);
-  font-size: 9px;
+  font-size: 10px;
 }
 .experience-bridge {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 18px;
-  padding-block: 30px;
+  padding-top: 32px;
   font-size: 10px;
   color: var(--muted);
 }
@@ -227,97 +246,97 @@
   margin-left: auto;
 }
 .honours-section {
-  padding-block: 72px 82px;
-  background: var(--accent);
-  color: #26321e;
+  --ink: #132039;
+  --muted: #526078;
+  --accent: #315de8;
+  --border: #13203926;
+  padding: 100px 0;
+  background: var(--paper, #e9eef5);
+  color: var(--ink);
 }
 .honours-section .eyebrow,
 .honours-section .eyebrow > span {
-  color: #425430;
+  color: var(--accent);
 }
 .honours-section .section-title-row {
-  align-items: center;
-  margin-bottom: 46px;
+  margin-bottom: 64px;
 }
 .honours-section h2 {
-  font-size: clamp(38px, 4.2vw, 62px);
+  max-width: 700px;
 }
 .honours-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 28px 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 72px;
 }
 .honours-grid > div {
-  border-left: 1px solid #607e3a65;
-  padding: 0 23px;
+  border-top: 1px solid var(--border);
+  padding: 26px 0 36px;
 }
-.honours-grid > div:nth-child(3n + 1) {
-  border-left: 0;
-  padding-left: 0;
-}
-.honours-grid > div:nth-child(3n) {
-  padding-right: 0;
-}
-.honours-grid > div:nth-child(-n + 3) {
-  padding-bottom: 26px;
-  border-bottom: 1px solid #607e3a65;
+.honour {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: 0 26px;
 }
 .honour-label {
+  grid-column: 1 / -1;
   display: flex;
   justify-content: space-between;
   gap: 10px;
-  font-size: 9px;
-  color: #425430;
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 25px;
 }
 .honour-result {
-  display: flex;
-  align-items: center;
-  min-height: 103px;
-  font-size: clamp(30px, 3.2vw, 48px);
+  grid-column: 1;
+  grid-row: 2 / 4;
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(38px, 4.2vw, 62px);
   font-weight: 500;
-  letter-spacing: -0.06em;
-  line-height: 1;
+  letter-spacing: -0.065em;
+  line-height: 1.05;
 }
 .honour-ioai .honour-result {
-  font-size: 29px;
-  max-width: 140px;
-  letter-spacing: -0.035em;
+  font-size: clamp(26px, 2.8vw, 40px);
+  max-width: 170px;
 }
 .honour-ftc .honour-result,
 .honour-vex-iq .honour-result {
-  font-size: 61px;
-}
-.honour.honour-ftc > p,
-.honour.honour-vex-iq > p {
-  font-size: 14px;
-}
-.honour.honour-ftc .achievement-context {
-  font-size: 18px;
-  color: #26321e;
-  margin: 14px 0 0;
-}
-.honour-vex-iq .achievement-context {
-  margin: 14px 0 0;
+  font-size: 74px;
 }
 .honour p {
-  font-size: 12px;
-  color: #3e512b;
-  line-height: 1.5;
-  margin: 0 0 17px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.65;
+  margin: 0 0 10px;
 }
 .honour h3 {
-  font-size: 12px;
-  font-weight: 400;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 500;
   line-height: 1.6;
-  max-width: 180px;
   margin: 0;
-  color: #3e512b;
+}
+.honour .achievement-context {
+  grid-column: 1 / -1;
+  margin-top: 20px;
+  margin-bottom: 0;
+}
+.achievement-verification {
+  grid-column: 1 / -1;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  font-size: 14px;
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 .skills-section {
   display: grid;
-  grid-template-columns: 0.7fr 1.3fr;
-  gap: 90px;
-  padding-top: 114px;
+  grid-template-columns: 0.85fr 1.15fr;
+  gap: 100px;
 }
 .skills-section > .reveal-block {
   align-self: start;
@@ -325,30 +344,31 @@
   top: 120px;
 }
 .skills-section h2 {
-  font-size: 52px;
+  max-width: 500px;
 }
 .skill-row {
   display: grid;
-  grid-template-columns: 0.9fr 1.1fr;
-  gap: 24px;
+  grid-template-columns: 0.85fr 1.15fr;
+  gap: 32px;
   border-top: 1px solid var(--border);
-  padding: 27px 0;
+  padding: 34px 0;
 }
 .skill-rows > div:last-child .skill-row {
   border-bottom: 1px solid var(--border);
 }
 .skill-heading > .mono {
   color: var(--accent);
-  font-size: 10px;
+  font-size: 11px;
 }
 .skill-heading h3 {
-  font-size: 20px;
-  font-weight: 400;
-  letter-spacing: -0.04em;
-  margin: 13px 0 10px;
+  font-family: var(--font-display), sans-serif;
+  font-size: 23px;
+  font-weight: 500;
+  letter-spacing: -0.045em;
+  margin: 14px 0 10px;
 }
 .skill-heading p {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
   line-height: 1.7;
   margin: 0;
@@ -359,12 +379,12 @@
   margin: 0;
 }
 .core-skills li {
-  font-size: 16px;
+  font-size: 17px;
   line-height: 1.6;
-  margin-bottom: 7px;
+  margin-bottom: 9px;
 }
 .skill-details {
-  margin-top: 8px;
+  margin-top: 10px;
 }
 .skill-details summary {
   display: flex;
@@ -373,7 +393,7 @@
   gap: 10px;
   min-height: 44px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.6;
   cursor: pointer;
   list-style: none;
@@ -390,20 +410,22 @@
   margin: 0;
 }
 .skill-details li {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
   line-height: 1.7;
 }
 .contact-section {
-  padding-block: 70px 80px;
+  position: relative;
+  padding-block: 90px 100px;
   border-top: 1px solid var(--border);
 }
 .contact-section h2 {
-  font-size: clamp(64px, 8.6vw, 127px);
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(62px, 9vw, 135px);
   font-weight: 500;
-  letter-spacing: -0.065em;
-  line-height: 0.98;
-  position: relative;
+  letter-spacing: -0.07em;
+  line-height: 1.03;
+  margin: 30px 0 0;
 }
 .contact-section h2 > span {
   color: var(--accent);
@@ -411,26 +433,33 @@
 .contact-bottom {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 70px;
-  margin-top: 54px;
+  gap: 90px;
+  margin-top: 65px;
 }
 .contact-intro > p {
   color: var(--muted);
-  font-size: 15px;
-  line-height: 1.8;
+  font-size: 16px;
+  line-height: 1.9;
   margin: 0;
+}
+.contact-intro > .opportunity-note {
+  margin-top: 24px;
+  font-size: 14px;
 }
 .contact-links {
   border-top: 1px solid var(--border);
 }
 .contact-links > a {
   display: grid;
-  grid-template-columns: 65px 1fr 19px;
+  grid-template-columns: 70px 1fr 22px;
   align-items: center;
   gap: 18px;
-  padding: 20px 0;
+  padding: 23px 0;
   border-bottom: 1px solid var(--border);
-  min-height: 68px;
+  min-height: 72px;
+  transition:
+    padding 0.3s var(--ease),
+    color 0.3s;
 }
 .contact-links .mono {
   font-size: 10px;
@@ -438,13 +467,21 @@
   text-transform: uppercase;
 }
 .contact-links > a > span:nth-child(2) {
-  font-size: 15px;
+  font-size: 16px;
   overflow-wrap: anywhere;
 }
 .contact-links svg {
   color: var(--accent);
+  transition: transform 0.3s var(--ease);
 }
-.contact-links a:hover > span:nth-child(2) {
+.contact-links a:hover {
+  padding-inline: 10px;
+  color: var(--accent);
+}
+.contact-links a:hover svg {
+  transform: translate(3px, -3px);
+}
+.contact-resume > span:nth-child(2) {
   color: var(--accent);
 }
 .footer {
@@ -452,7 +489,7 @@
   gap: 24px;
   align-items: center;
   border-top: 1px solid var(--border);
-  padding-block: 24px;
+  padding-block: 28px;
   color: var(--muted);
   font-size: 11px;
 }
@@ -462,7 +499,7 @@
 }
 .footer-location {
   margin-left: auto;
-  font-size: 9px;
+  font-size: 10px;
 }
 .back-top {
   display: flex;
@@ -481,125 +518,96 @@
   }
 }
 @media (max-width: 1100px) {
-  .about-section {
+  .about-layout {
     gap: 50px;
   }
-  .about-content > .large-body {
-    font-size: 23px;
-  }
   .experience-entry {
-    grid-template-columns: 75px 1fr 1.2fr;
+    grid-template-columns: 90px 1fr 1.15fr;
     gap: 28px;
   }
-  .experience-display {
-    font-size: 47px;
-  }
   .experience-copy > .experience-statement {
-    font-size: 21px;
-  }
-  .honours-grid > div {
-    padding-inline: 16px;
-  }
-  .honour-ioai .honour-result {
     font-size: 24px;
   }
-  .skills-section {
-    gap: 40px;
-    grid-template-columns: 0.7fr 1.3fr;
+  .honours-grid {
+    column-gap: 40px;
   }
-  .skills-section h2 {
-    font-size: 43px;
+  .skills-section {
+    gap: 50px;
   }
   .skill-row {
-    gap: 20px;
+    gap: 22px;
   }
   .contact-bottom {
-    gap: 40px;
-  }
-  .contact-links > a {
-    gap: 10px;
-    grid-template-columns: 55px 1fr 19px;
+    gap: 50px;
   }
 }
 @media (max-width: 800px) {
-  .about-section {
-    gap: 40px;
+  .about-layout {
+    grid-template-columns: 1fr;
+    gap: 44px;
   }
-  .about-content {
-    padding-top: 38px;
+  .about-coordinate {
+    margin-bottom: 30px;
+  }
+  .education-record {
+    max-width: 500px;
   }
   .about-content > .large-body {
-    font-size: 22px;
+    font-size: 32px;
   }
   .experience-entry {
     grid-template-columns: 1fr 1.2fr;
-    gap: 25px 40px;
+    gap: 28px 40px;
   }
   .experience-year {
     grid-column: 1/-1;
     flex-direction: row;
     align-items: center;
-    gap: 20px;
+    gap: 24px;
   }
   .experience-year > span:last-child {
     max-width: none;
-    font-size: 9px;
   }
-  .experience-display {
-    font-size: 51px;
+  .honours-section {
+    padding-block: 72px;
   }
-  .experience-copy > .experience-statement {
-    font-size: 21px;
+  .honours-grid {
+    gap: 0 30px;
   }
-  .honours-section .section-title-row {
-    flex-direction: row;
-    gap: 20px;
+  .honour {
+    grid-template-columns: 1fr;
   }
-  .honour-ioai .honour-result {
-    font-size: 30px;
-    max-width: none;
+  .honour-label,
+  .honour-result {
+    grid-column: auto;
+    grid-row: auto;
   }
   .honour-result {
-    min-height: 86px;
-    font-size: 39px;
+    margin-bottom: 22px;
   }
-  .honour h3 {
-    max-width: 270px;
-  }
-  .honour p {
-    margin-bottom: 10px;
+  .honour-ioai .honour-result {
+    max-width: none;
+    font-size: 32px;
   }
   .skills-section {
     display: block;
   }
   .skills-section > .reveal-block {
     position: static;
-    margin-bottom: 43px;
-  }
-  .skills-section h2 {
-    max-width: 450px;
-    font-size: 48px;
+    margin-bottom: 48px;
   }
   .skill-row {
-    grid-template-columns: 1fr 1.2fr;
     gap: 40px;
   }
-  .contact-section h2 {
-    font-size: 75px;
-  }
   .contact-bottom {
-    gap: 30px;
-    grid-template-columns: 0.8fr 1.2fr;
+    gap: 36px;
   }
   .contact-links > a {
-    grid-template-columns: 1fr 19px;
-    gap: 7px;
+    grid-template-columns: 1fr 22px;
+    gap: 9px;
   }
   .contact-links .mono {
     grid-column: 1/-1;
-  }
-  .contact-links > a > span:nth-child(2) {
-    font-size: 15px;
   }
   .footer-location {
     display: none;
@@ -609,216 +617,155 @@
   }
 }
 @media (max-width: 600px) {
-  .about-section {
-    grid-template-columns: 1fr;
-    gap: 22px;
-  }
-  .about-content {
-    padding: 0;
+  .about-layout {
+    gap: 32px;
   }
   .about-content > .large-body {
-    font-size: 23px;
+    font-size: 28px;
   }
   .about-content > p {
     font-size: 15px;
   }
-  .education-record {
-    margin-top: 22px;
+  .about-coordinate {
+    gap: 10px 14px;
+    font-size: 9px;
+  }
+  .education-record > strong {
+    font-size: 16px;
   }
   .experience-entry {
     grid-template-columns: 1fr;
-    gap: 18px;
-    padding-block: 26px;
+    gap: 24px;
+    padding-block: 36px;
   }
   .experience-year {
     grid-column: auto;
-    gap: 22px;
+    gap: 24px;
   }
   .experience-year > span:first-child {
-    font-size: 16px;
+    font-size: 17px;
   }
   .experience-year > span:last-child {
-    font-size: 8px;
+    font-size: 9px;
   }
   .experience-display {
-    font-size: 66px;
-    margin-bottom: 16px;
+    font-size: 60px;
+    margin-bottom: 22px;
   }
   .experience-identity h3 {
-    font-size: 22px;
-    max-width: 350px;
+    font-size: 23px;
   }
   .experience-copy > .experience-statement {
-    font-size: 22px;
+    font-size: 24px;
   }
-  .experience-copy p {
+  .experience-copy > p {
     font-size: 14px;
-    line-height: 1.85;
-  }
-  .discipline-list {
-    gap: 7px 15px;
-    padding-top: 7px;
   }
   .ftc-result > span:first-child {
-    font-size: 128px;
-  }
-  .experience-ftc .experience-copy {
-    padding-top: 0;
-  }
-  .quant-mark svg {
-    max-width: 260px;
+    font-size: 116px;
   }
   .experience-bridge {
     flex-wrap: wrap;
-    gap: 12px;
-    padding-block: 25px;
-    font-size: 8px;
+    gap: 14px;
+    font-size: 9px;
   }
   .experience-bridge > span:last-child {
     width: 100%;
   }
   .honours-section {
-    padding-block: 44px;
+    padding-block: 60px;
   }
   .honours-section .section-title-row {
-    margin-bottom: 24px;
-  }
-  .honours-section h2 {
-    font-size: 40px;
+    margin-bottom: 36px;
   }
   .honours-grid {
-    display: block;
+    grid-template-columns: 1fr;
   }
-  .honours-grid > div,
-  .honours-grid > div:nth-child(-n + 3) {
-    padding: 16px 0;
-    border-left: 0;
-    border-bottom: 1px solid #607e3a65;
-  }
-  .honours-grid > div:first-child {
-    border-top: 1px solid #607e3a65;
+  .honours-grid > div {
+    padding-block: 24px 28px;
   }
   .honour {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    align-items: center;
-    gap: 0 14px;
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: 0 18px;
   }
   .honour-label {
     grid-column: 1/-1;
+    margin-bottom: 20px;
   }
   .honour-result {
     grid-column: 1;
-    grid-row: 2/4;
-    min-height: 87px;
-    font-size: 42px;
+    grid-row: 2 / 4;
+    font-size: 40px;
+    margin: 0;
   }
   .honour-ioai .honour-result {
-    font-size: 29px;
-    max-width: 125px;
+    font-size: 27px;
+    max-width: 120px;
   }
   .honour-ftc .honour-result,
   .honour-vex-iq .honour-result {
-    font-size: 57px;
+    font-size: 60px;
   }
-  .honour p {
-    margin: 15px 0 5px;
-  }
+  .honour p,
   .honour h3 {
-    font-size: 11px;
-    margin-bottom: 6px;
-  }
-  .honour-ftc h3,
-  .honour-vex-iq h3 {
-    font-size: 12px;
-  }
-  .skills-section h2 {
-    font-size: 40px;
+    font-size: 14px;
   }
   .skill-row {
     grid-template-columns: 1fr;
-    gap: 14px;
-    padding-block: 20px;
+    gap: 20px;
+    padding-block: 26px;
   }
   .skill-heading {
     display: grid;
     grid-template-columns: 22px 1fr;
-    gap: 8px 10px;
+    gap: 8px 12px;
     align-items: center;
   }
   .skill-heading h3 {
     margin: 0;
-    font-size: 23px;
+    font-size: 24px;
   }
   .skill-heading p {
     grid-column: 2;
   }
   .skill-content {
-    padding-left: 32px;
-  }
-  .core-skills li {
-    font-size: 17px;
-  }
-  .skill-details summary {
-    font-size: 12px;
+    padding-left: 34px;
   }
   .contact-section {
-    padding-block: 44px 40px;
+    padding-block: 55px 50px;
   }
   .contact-section .eyebrow {
     font-size: 9px;
-    gap: 10px;
   }
   .contact-section h2 {
-    font-size: clamp(48px, 12.5vw, 69px);
+    font-size: clamp(45px, 12.5vw, 72px);
   }
   .contact-bottom {
     grid-template-columns: 1fr;
-    gap: 28px;
-    margin-top: 31px;
+    gap: 32px;
+    margin-top: 36px;
   }
   .contact-intro > p {
-    font-size: 14px;
-  }
-  .contact-links > a > span:nth-child(2) {
-    font-size: 16px;
+    font-size: 15px;
   }
   .contact-links > a {
-    padding-block: 17px;
+    padding-block: 20px;
   }
   .footer {
     gap: 14px;
-    padding-block: 17px;
+    padding-block: 18px;
     font-size: 10px;
-  }
-  .footer .wordmark {
-    font-size: 22px;
   }
   .back-top {
     gap: 8px;
   }
 }
-
-.contact-intro > .opportunity-note {
-  margin-top: 18px;
-  font-size: 14px;
-}
-.contact-resume {
-  border-top: 1px solid var(--accent);
-}
-.contact-resume > span:nth-child(2) {
-  color: var(--accent);
-}
-.achievement-context,
-.achievement-verification {
-  grid-column: 1 / -1;
-}
-.achievement-verification {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 44px;
-  font-size: 13px;
-  text-decoration: underline;
-  text-underline-offset: 4px;
+@media (prefers-reduced-motion: reduce) {
+  .quant-mark .quant-signal {
+    animation: none;
+  }
+  .contact-links > a,
+  .contact-links svg {
+    transition: none;
+  }
 }

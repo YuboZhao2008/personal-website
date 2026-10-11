@@ -13,12 +13,11 @@ export function ProjectShowcase({
   return (
     <article
       id={`project-${project.id}`}
-      className={`project-showcase project-${project.presentation} project-${project.visual}`}
+      className={`project-showcase project-${project.presentation} project-${project.visual} project-index-${index + 1}`}
     >
       <div className="project-body">
         <div className="project-meta mono">
           <span>{project.category}</span>
-          <span>{String(index + 1).padStart(2, "0")} /</span>
         </div>
         <h3>{project.title}</h3>
         <p className="project-subtitle">{project.subtitle}</p>

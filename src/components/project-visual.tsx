@@ -5,6 +5,7 @@ import type { Project } from "@/data/profile";
 import { JarvisVisual } from "./jarvis-visual";
 import { WarcraftVisual } from "./warcraft-visual";
 import { RoomReadVisual } from "./roomread-visual";
+import { ProjectSurface } from "./project-surface";
 
 function MedicalVisual() {
   return (
@@ -249,7 +250,7 @@ function SimulationVisual() {
 }
 export function ProjectVisual({ variant }: { variant: Project["visual"] }) {
   return (
-    <div className={`project-visual preview-${variant}`}>
+    <ProjectSurface className={`project-visual preview-${variant}`}>
       {variant === "intelligence" ? (
         <JarvisVisual />
       ) : variant === "roomread" ? (
@@ -263,6 +264,6 @@ export function ProjectVisual({ variant }: { variant: Project["visual"] }) {
       ) : variant === "simulation" ? (
         <SimulationVisual />
       ) : null}
-    </div>
+    </ProjectSurface>
   );
 }

@@ -7,30 +7,37 @@ import {
 import { publicHref } from "@/data/links";
 import { AnimatedSection } from "./animated-section";
 import { SectionHeading } from "./ui";
-import { ProjectShowcase } from "./project-card";
+import { RollingProjectGallery } from "./rolling-project-gallery";
 
 export function About() {
   return (
-    <section id="about" className="section-shell section-space about-section">
-      <AnimatedSection>
-        <SectionHeading
-          number="01"
-          eyebrow="PROFILE"
-          title="Between a model and the real world."
-        />
-        <div className="education-record">
-          <span className="mono">UNIVERSITY OF WATERLOO</span>
-          <strong>{profile.education.degree}</strong>
-          <span>1A · Expected graduation {profile.education.graduation}</span>
-        </div>
-      </AnimatedSection>
-      <AnimatedSection className="about-content">
-        <p className="large-body">{profile.about}</p>
-        <p>{profile.philosophy}</p>
-        <a className="text-link" href="#experience">
-          The experience behind the work <ArrowDownRight size={18} />
-        </a>
-      </AnimatedSection>
+    <section id="about" className="about-section">
+      <div className="section-shell section-space about-layout">
+        <AnimatedSection>
+          <SectionHeading
+            number="01"
+            eyebrow="PROFILE"
+            title="Between a model and the real world."
+          />
+          <div className="about-coordinate mono" aria-hidden="true">
+            <span>PERCEPTION</span>
+            <span>REASONING</span>
+            <span>INTERACTION</span>
+          </div>
+          <div className="education-record">
+            <span className="mono">UNIVERSITY OF WATERLOO</span>
+            <strong>{profile.education.degree}</strong>
+            <span>1A · Expected graduation {profile.education.graduation}</span>
+          </div>
+        </AnimatedSection>
+        <AnimatedSection className="about-content">
+          <p className="large-body">{profile.about}</p>
+          <p>{profile.philosophy}</p>
+          <a className="text-link" href="#experience">
+            The experience behind the work <ArrowDownRight size={18} />
+          </a>
+        </AnimatedSection>
+      </div>
     </section>
   );
 }
@@ -102,7 +109,7 @@ export function Experience() {
     >
       <AnimatedSection className="section-title-row">
         <SectionHeading
-          number="02"
+          number="03"
           eyebrow="EXPERIENCE"
           title="Tested beyond the classroom."
         />
@@ -129,33 +136,8 @@ export function Experience() {
 }
 export function Projects() {
   return (
-    <section
-      id="projects"
-      className="section-shell section-space projects-section"
-    >
-      <AnimatedSection className="section-title-row">
-        <SectionHeading
-          number="03"
-          eyebrow="SELECTED SYSTEMS"
-          title="Intelligence, assembled."
-          description="AI agents, evidence-grounded research, and learning systems — connecting decision intelligence with perception and real-time control."
-        />
-        <span className="section-counter mono">
-          01 — {String(profile.projects.length).padStart(2, "0")}
-          <br />
-          SELECTED WORK
-        </span>
-      </AnimatedSection>
-      <div className="project-exhibits">
-        {profile.projects.map((project, index) => (
-          <AnimatedSection
-            key={project.id}
-            className={`exhibit-slot exhibit-${project.presentation}`}
-          >
-            <ProjectShowcase project={project} index={index} />
-          </AnimatedSection>
-        ))}
-      </div>
+    <section id="projects" className="cinematic-projects">
+      <RollingProjectGallery projects={profile.projects} />
     </section>
   );
 }
@@ -172,7 +154,7 @@ export function Achievements() {
         </AnimatedSection>
         <div className="honours-grid">
           {profile.achievements.map((achievement: Achievement) => (
-            <AnimatedSection key={achievement.id}>
+            <AnimatedSection key={achievement.id} delay={0.04}>
               <article className={`honour honour-${achievement.id}`}>
                 <div className="honour-label mono">
                   <span>{achievement.shortTitle}</span>
@@ -296,9 +278,7 @@ export function Contact() {
   return (
     <section id="contact" className="section-shell contact-section">
       <AnimatedSection>
-        <div className="eyebrow">
-          <span>06 /</span> BUILD / COLLABORATE / EXPERIMENT
-        </div>
+        <div className="eyebrow">A CONVERSATION STARTS SOMETHING</div>
         <h2>
           Let’s build
           <br />

@@ -2,9 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight, Menu, X } from "lucide-react";
+import { motion, useReducedMotion } from "motion/react";
 import { navigation, profile } from "@/data/profile";
 
 export function Navbar() {
+  const reduceMotion = useReducedMotion();
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState("#home");
   const [scrolled, setScrolled] = useState(false);
@@ -81,6 +83,18 @@ export function Navbar() {
         }
       >
         {label}
+        {active === href && (
+          <motion.span
+            className="nav-active-mark"
+            layoutId={mobile ? "mobile-active" : "desktop-active"}
+            transition={
+              reduceMotion
+                ? { duration: 0 }
+                : { type: "spring", stiffness: 340, damping: 32 }
+            }
+            aria-hidden="true"
+          />
+        )}
       </a>
     ));
   }
