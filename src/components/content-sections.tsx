@@ -17,7 +17,7 @@ export function About() {
           <SectionHeading
             number="01"
             eyebrow="PROFILE"
-            title="Between a model and the real world."
+            title="Software engineering, at Waterloo and beyond."
           />
           <div className="about-coordinate mono" aria-hidden="true">
             <span>PERCEPTION</span>
@@ -111,7 +111,7 @@ export function Experience() {
         <SectionHeading
           number="03"
           eyebrow="EXPERIENCE"
-          title="Tested beyond the classroom."
+          title="Experience"
         />
         <p className="section-aside">
           Competitive AI. International robotics.
@@ -149,7 +149,7 @@ export function Achievements() {
           <SectionHeading
             number="04"
             eyebrow="HONOURS & COMPETITIONS"
-            title="A record of the work."
+            title="Honours & competitions"
           />
         </AnimatedSection>
         <div className="honours-grid">
@@ -205,7 +205,7 @@ export function Skills() {
         <SectionHeading
           number="05"
           eyebrow="TECHNICAL TOOLKIT"
-          title="The parts behind the systems."
+          title="Technical toolkit"
           description="Programming, machine learning, computer vision, and software integration across the work above."
         />
       </AnimatedSection>
@@ -278,12 +278,7 @@ export function Contact() {
   return (
     <section id="contact" className="section-shell contact-section">
       <AnimatedSection>
-        <div className="eyebrow">A CONVERSATION STARTS SOMETHING</div>
-        <h2>
-          Let’s build
-          <br />
-          what comes <span>next.</span>
-        </h2>
+        <h2>Have something in mind?</h2>
         <div className="contact-bottom">
           <div className="contact-intro">
             <p>

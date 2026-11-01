@@ -1,173 +1,76 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowUpRight, Menu, X } from "lucide-react";
-import { motion, useReducedMotion } from "motion/react";
+import { ArrowUpRight, Plus, X } from "lucide-react";
 import { navigation, profile } from "@/data/profile";
 
 export function Navbar() {
-  const reduceMotion = useReducedMotion();
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState("#home");
-  const [scrolled, setScrolled] = useState(false);
   const toggle = useRef<HTMLButtonElement>(null);
-  const mobileDialog = useRef<HTMLDialogElement>(null);
-  const desktopNav = useRef<HTMLElement>(null);
-  const sentinel = useRef<HTMLSpanElement>(null);
+  const dialog = useRef<HTMLDialogElement>(null);
+
   useEffect(() => {
-    const observer = new IntersectionObserver(([entry]) =>
-      setScrolled(!entry.isIntersecting),
-    );
-    if (sentinel.current) observer.observe(sentinel.current);
-    const breakpoint = matchMedia("(min-width: 601px)");
-    const closeOnResize = () => {
-      const hadDialogFocus = mobileDialog.current?.contains(
-        document.activeElement,
-      );
-      mobileDialog.current?.close();
-      if (breakpoint.matches && hadDialogFocus)
-        desktopNav.current?.querySelector<HTMLAnchorElement>("a")?.focus();
-    };
-    breakpoint.addEventListener("change", closeOnResize);
-    return () => {
-      observer.disconnect();
-      breakpoint.removeEventListener("change", closeOnResize);
-    };
-  }, []);
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries)
-          if (entry.isIntersecting) setActive(`#${entry.target.id}`);
-      },
-      { rootMargin: "-15% 0px -55% 0px", threshold: 0 },
-    );
+    const observer = new IntersectionObserver((entries) => {
+      for (const entry of entries) if (entry.isIntersecting) setActive(`#${entry.target.id}`);
+    }, { rootMargin: "-15% 0px -55% 0px" });
     [{ href: "#home" }, ...navigation].forEach(({ href }) => {
       const section = document.querySelector(href);
       if (section) observer.observe(section);
     });
     return () => observer.disconnect();
   }, []);
+
   useEffect(() => {
     if (!open) return;
-    const previousOverflow = document.body.style.overflow;
+    const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
+    return () => { document.body.style.overflow = previous; };
   }, [open]);
 
-  function openNavigation() {
-    // Native modality makes the background inert and handles Escape and focus return.
-    toggle.current?.focus({ preventScroll: true });
-    mobileDialog.current?.showModal();
-    mobileDialog.current?.querySelector<HTMLAnchorElement>("nav a")?.focus();
-    setOpen(true);
-  }
-
-  function navigationLinks(mobile = false) {
-    return navigation.map(({ label, href }) => (
-      <a
-        key={href}
-        href={href}
-        aria-current={active === href ? "location" : undefined}
-        onClick={
-          mobile
-            ? () => {
-                mobileDialog.current?.close();
-                const section = document.querySelector<HTMLElement>(href);
-                section?.setAttribute("tabindex", "-1");
-                section?.focus({ preventScroll: true });
-              }
-            : undefined
-        }
-      >
-        {label}
-        {active === href && (
-          <motion.span
-            className="nav-active-mark"
-            layoutId={mobile ? "mobile-active" : "desktop-active"}
-            transition={
-              reduceMotion
-                ? { duration: 0 }
-                : { type: "spring", stiffness: 340, damping: 32 }
-            }
-            aria-hidden="true"
-          />
-        )}
-      </a>
-    ));
-  }
   return (
     <>
-      <span ref={sentinel} className="nav-sentinel" aria-hidden="true" />
-      <header
-        className={`site-header${scrolled ? " is-scrolled" : ""}${open ? " menu-open" : ""}`}
-      >
+      <header className="site-header">
         <div className="nav-shell">
-          <a
-            href="#home"
-            className="wordmark"
-            aria-label={`${profile.name}, home`}
-          >
-            {profile.initials}
-            <span>.</span>
-          </a>
-          <nav
-            ref={desktopNav}
-            id="main-navigation"
-            className="navigation desktop-navigation"
-            aria-label="Main navigation"
-          >
-            {navigationLinks()}
-          </nav>
-          <a className="nav-contact" href="#contact">
-            Get in touch <ArrowUpRight size={14} />
-          </a>
-          <button
-            ref={toggle}
-            className="menu-toggle"
-            aria-label="Open navigation"
-            aria-expanded={open}
-            aria-controls="mobile-navigation"
-            aria-haspopup="dialog"
-            onClick={openNavigation}
-          >
-            <Menu />
-          </button>
+          <a href="#home" className="identity-link" aria-label={`${profile.name}, home`}><span className="identity-mark" aria-hidden="true">yz</span><span>{profile.name}</span></a>
+          <span className="nav-discipline">Software / AI / Robotics</span>
+          <a className="nav-projects" href="#projects">Selected work <ArrowUpRight size={16} aria-hidden="true" /></a>
+          <button ref={toggle} className="menu-toggle" aria-label="Open navigation" aria-expanded={open} aria-controls="mobile-navigation" aria-haspopup="dialog" onClick={() => {
+            toggle.current?.focus({ preventScroll: true });
+            dialog.current?.showModal();
+            setOpen(true);
+          }}>Index <Plus size={20} aria-hidden="true" /></button>
         </div>
+        <noscript><style>{`.menu-toggle {display:none!important}.site-header{position:static!important}`}</style><nav className="no-script-navigation" aria-label="Main navigation">{navigation.map(({ label, href }) => <a key={href} href={href}>{label}</a>)}</nav></noscript>
       </header>
-      <dialog
-        ref={mobileDialog}
-        id="mobile-navigation"
-        className="mobile-navigation-dialog"
-        aria-label="Mobile navigation"
-        onClose={(event) => setOpen(event.currentTarget.open)}
-        onClick={(event) => {
-          if (event.target !== event.currentTarget) return;
-          const bounds = event.currentTarget.getBoundingClientRect();
-          if (
-            event.clientX < bounds.left ||
-            event.clientX > bounds.right ||
-            event.clientY < bounds.top ||
-            event.clientY > bounds.bottom
-          )
-            event.currentTarget.close();
-        }}
-      >
-        <div className="mobile-navigation-heading">
-          <span className="mono">NAVIGATION</span>
-          <button
-            className="menu-toggle"
-            aria-label="Close navigation"
-            onClick={() => mobileDialog.current?.close()}
-          >
-            <X />
-          </button>
-        </div>
-        <nav className="navigation" aria-label="Mobile navigation">
-          {navigationLinks(true)}
+      <dialog ref={dialog} id="mobile-navigation" className="mobile-navigation-dialog" aria-label="Site index" onClose={() => setOpen(false)} onKeyDown={(event) => {
+        // Keep Tab inside the index even when Chromium would otherwise move to browser chrome.
+        if (event.key !== "Tab") return;
+        const items = Array.from(event.currentTarget.querySelectorAll<HTMLElement>("button:not([disabled]), a[href]"));
+        const first = items[0];
+        const last = items[items.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last?.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first?.focus();
+        }
+      }} onClick={(event) => {
+        if (event.target !== event.currentTarget) return;
+        const box = event.currentTarget.getBoundingClientRect();
+        if (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom) dialog.current?.close();
+      }}>
+        <div className="mobile-navigation-heading"><span>Inside this portfolio</span><button className="menu-toggle" aria-label="Close navigation" onClick={() => dialog.current?.close()}><X size={22} /></button></div>
+        <nav className="navigation" aria-label="Main navigation">
+          {navigation.map(({ label, href }) => <a key={href} href={href} aria-current={active === href ? "location" : undefined} onClick={() => {
+            dialog.current?.close();
+            const section = document.querySelector<HTMLElement>(href);
+            section?.setAttribute("tabindex", "-1");
+            section?.focus({ preventScroll: true });
+          }}>{label}<ArrowUpRight size={22} aria-hidden="true" /></a>)}
         </nav>
+        <p className="index-note">{profile.university}<br />{profile.location}</p>
       </dialog>
     </>
   );

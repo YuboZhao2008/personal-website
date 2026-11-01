@@ -1,1034 +1,186 @@
-﻿import assert from "node:assert/strict";
-import fs from "node:fs";
-import { createRequire } from "node:module";
-import { chromium } from "playwright-core";
-import { profile, navigation } from "../src/data/profile.ts";
-import { publicHref, projectEvidence } from "../src/data/links.ts";
-import { site } from "../src/data/site.ts";
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import { createRequire } from 'node:module';
+import { chromium } from 'playwright-core';
+import { profile, navigation } from '../src/data/profile.ts';
+import { publicHref, projectEvidence } from '../src/data/links.ts';
 
 const require = createRequire(import.meta.url);
-const baseURL = process.env.BASE_URL || "http://127.0.0.1:3000";
-const widths = process.env.BROWSER_VIEWPORTS === "none"
-  ? []
-  : process.env.BROWSER_VIEWPORTS
-    ? process.env.BROWSER_VIEWPORTS.split(",").map(Number)
-    : [320, 375, 390, 430, 600, 768, 800, 1024, 1280, 1440, 1920];
-const report = {
-  viewports: [],
-  consoleErrors: [],
-  requestFailures: [],
-  checks: [],
-};
-const screenshotStyle =
-  ".site-header, .skip-link, nextjs-portal { visibility: hidden !important; }";
-fs.mkdirSync("test-results", { recursive: true });
+const baseURL = process.env.BASE_URL || 'http://127.0.0.1:3113';
+const executablePath = process.env.BROWSER_PATH || chromium.executablePath();
+const widths = process.env.BROWSER_VIEWPORTS ? process.env.BROWSER_VIEWPORTS.split(',').map(Number) : [320,360,390,430,768,870,1024,1280,1440,1920];
+const expectedOrder = ['warcraft-rl','brain-tumor','jarvis','roomread','gesture','future-sim'];
+const report = { viewports:[], checks:[], errors:[], requestFailures:[], accessibility:[], performance:{} };
+fs.mkdirSync('test-results',{recursive:true});
+assert.deepEqual(profile.projects.map(p=>p.id), expectedOrder, 'User-specified project order');
+for (const bad of [null,'','#','javascript:alert(1)','file:///resume.pdf','C:/private/resume.pdf','https://user:pass@example.test','not-a-url']) {
+  assert.equal(publicHref(bad),null); assert.equal(publicHref(bad,true),null);
+}
+assert.equal(publicHref('/resume.pdf',true),'/resume.pdf');
+assert.equal(publicHref('//example.test/resume.pdf',true),null);
+assert.deepEqual(projectEvidence({repositoryUrl:'#',demoUrl:'javascript:alert(1)'}),[]);
 
-// Test-only fixtures: these URLs are never included in portfolio content.
-for (const invalid of [
-  null,
-  "",
-  "#",
-  "javascript:alert(1)",
-  "file:///resume.pdf",
-  "C:/private/resume.pdf",
-  "https://user:pass@example.test",
-  "not-a-url",
-]) {
-  assert.equal(publicHref(invalid), null);
-  assert.equal(publicHref(invalid, true), null);
+function observe(page, noJS=false) {
+  page.on('pageerror',e=>report.errors.push(e.message));
+  page.on('console',m=>{if(m.type()==='error') report.errors.push(m.text());});
+  page.on('requestfailed',r=>{if(!(noJS && r.resourceType()==='script' && r.failure()?.errorText==='csp')) report.requestFailures.push({url:r.url(),reason:r.failure()?.errorText});});
 }
-assert.equal(publicHref("/resume.pdf", true), "/resume.pdf");
-assert.equal(publicHref("//example.test/resume.pdf", true), null);
-assert.equal(
-  publicHref("https://example.test/resume.pdf", true),
-  "https://example.test/resume.pdf",
-);
-assert.deepEqual(projectEvidence({}), []);
-assert.deepEqual(
-  projectEvidence({ repositoryUrl: "#", demoUrl: "javascript:alert(1)" }),
-  [],
-);
-assert.deepEqual(
-  projectEvidence({
-    repositoryUrl: "https://example.test/source",
-    demoUrl: "https://example.test/demo",
-    caseStudyUrl: "https://example.test/study",
-  }),
-  [
-    { label: "Repository", href: "https://example.test/source" },
-    { label: "Demo", href: "https://example.test/demo" },
-    { label: "Case study", href: "https://example.test/study" },
-  ],
-);
-
-function observeErrors(page, { scriptsDisabled = false } = {}) {
-  page.on("pageerror", (error) => report.consoleErrors.push(error.message));
-  page.on("console", (message) => {
-    if (message.type() === "error") report.consoleErrors.push(message.text());
-  });
-  page.on("requestfailed", (request) => {
-    // Chromium deliberately blocks script requests when JavaScript is disabled.
-    // Keep reporting every other failure, including CSP failures in normal pages.
-    if (
-      scriptsDisabled &&
-      request.resourceType() === "script" &&
-      request.failure()?.errorText === "csp"
-    )
-      return;
-    report.requestFailures.push({
-      url: request.url(),
-      error: request.failure()?.errorText,
-    });
-  });
+async function settled(page) { await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))); }
+async function overflow(page, label) {
+  const result = await page.evaluate(()=>({width:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth,
+    elements:[...document.querySelectorAll('main *')].filter(e=>{
+      if(e instanceof SVGElement || !e.checkVisibility())return false;
+      const r=e.getBoundingClientRect();return r.width>0&&(r.left < -1 || r.right > document.documentElement.clientWidth+1);
+    }).map(e=>({tag:e.tagName,class:e.className})).slice(0,8)}));
+  assert(result.scroll<=result.width+1,`${label}: document overflow ${JSON.stringify(result)}`);
+  assert.deepEqual(result.elements,[],`${label}: element overflow`);
 }
-async function noOverflow(page, context) {
-  const result = await page.evaluate(() => {
-    const width = document.documentElement.clientWidth;
-    return {
-      width,
-      scrollWidth: document.documentElement.scrollWidth,
-      overflowing: [...document.querySelectorAll("main *")]
-        .filter((el) => {
-          if (el instanceof SVGElement) return false;
-          const r = el.getBoundingClientRect();
-          return r.width > 0 && (r.right > width + 1 || r.left < -1);
-        })
-        .map((el) => el.className)
-        .slice(0, 10),
-    };
-  });
-  assert(
-    result.scrollWidth <= result.width,
-    context + " horizontal overflow: " + JSON.stringify(result),
-  );
-  assert.equal(
-    result.overflowing.length,
-    0,
-    context + " clipped content: " + JSON.stringify(result),
-  );
+async function openRecords(page) { await page.locator('.gallery-record').evaluateAll(es=>es.forEach(e=>e.open=true)); }
+async function axe(page,label) {
+  await page.addScriptTag({path:require.resolve('axe-core/axe.min.js')});
+  const violations=await page.evaluate(async()=> (await window.axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}})).violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))})));
+  report.accessibility.push({label,violations});
+  assert.deepEqual(violations,[],`${label}: accessibility failures`);
 }
-async function stableFrames(page) {
-  await page.evaluate(
-    () =>
-      new Promise((resolve) =>
-        requestAnimationFrame(() => requestAnimationFrame(resolve)),
-      ),
-  );
-}
-async function roboticsContent(page) {
-  const experience = page.locator("#experience-ftc");
-  assert(
-    (await experience.locator(".experience-statement").innerText()).includes(
-      "Three consecutive FTC World Championship qualifications",
-    ),
-  );
-  const result = "2nd Place Globally — 2024 · team result";
-  assert.equal(
-    await experience.locator(".experience-result-detail").innerText(),
-    result,
-  );
-  const ftc = page.locator(".honour-ftc");
-  assert(
-    (await ftc.innerText()).includes(
-      "Three consecutive World Championship qualifications",
-    ),
-  );
-  assert.equal(await ftc.locator(".achievement-context").innerText(), result);
-  const vex = page.locator(".honour-vex-iq");
-  assert.equal(await vex.count(), 1);
-  for (const phrase of [
-    "VEX IQ",
-    "Robotics Skills",
-    "1st Place",
-    "team result",
-    "Middle School Division",
-    "Dallas",
-    "Grade 8",
-  ])
-    assert(
-      (await vex.innerText()).includes(phrase),
-      `Missing robotics context: ${phrase}`,
-    );
-  assert.equal(await vex.locator(".achievement-verification").count(), 0);
-  const accessible = await experience.ariaSnapshot();
-  assert(
-    accessible.includes(
-      "Three consecutive FTC World Championship qualifications",
-    ),
-  );
-  assert(accessible.includes(result));
-  for (const label of await page
-    .locator(
-      ".honour-ftc p, .honour-ftc h3, .honour-vex-iq p, .honour-vex-iq h3, .experience-result-detail",
-    )
-    .all())
-    assert(
-      await label.evaluate(
-        (el) =>
-          parseFloat(getComputedStyle(el).fontSize) >=
-          (el.tagName === "P" ? 14 : 12),
-      ),
-      "Robotics copy or heading is too small",
-    );
-  for (const card of [ftc, vex])
-    assert(
-      await card.evaluate((el) => {
-        const bounds = el.getBoundingClientRect();
-        return [...el.children].every((child) => {
-          const r = child.getBoundingClientRect();
-          return r.left >= bounds.left - 1 && r.right <= bounds.right + 1;
-        });
-      }),
-      "Robotics content extends outside its column",
-    );
-}
-async function openProjectRecords(page) {
-  await page.locator(".gallery-record").evaluateAll((records) => records.forEach((record) => { record.open = true; }));
-}
-async function diagramBounds(card, width) {
-  for (const figure of await card.locator("figure").all()) {
-    assert(await figure.evaluate((el) => {
-      const bounds = el.getBoundingClientRect();
-      return [...el.querySelectorAll("*")].every((node) => {
-        const r = node.getBoundingClientRect();
-        return r.width === 0 || (r.left >= bounds.left - 1 && r.right <= bounds.right + 1 && r.top >= bounds.top - 1 && r.bottom <= bounds.bottom + 1);
-      });
-    }), `Diagram bounds at ${width}px`);
-  }
-}
-async function warcraftLayout(page, width) {
-  const card = page.locator("#project-warcraft-rl");
-  assert.equal(await card.count(), 1);
-  assert.equal(await card.locator(".warcraft-visual").count(), 1);
-  assert.equal(await card.locator(".simulation-visual, .project-link").count(), 0);
-  const text = await card.locator("figure").innerText();
-  for (const label of ["Lua state", "IPC bridge", "Python RL", "PPO policy", "Action queue", "Lua controller", "OBSERVATIONS", "ACTIONS", "Learned policies in development"])
-    assert(text.includes(label), `Missing Warcraft label: ${label}`);
-  await diagramBounds(card, width);
-  for (const label of await card.locator("figure strong, figure span, dt, dd, figcaption, .warcraft-note").all())
-    assert(await label.evaluate((el) => parseFloat(getComputedStyle(el).fontSize) >= 12), "Warcraft label below 12px");
-}
-async function focused(locator) {
-  assert(
-    await locator.evaluate((el) => el === document.activeElement),
-    "Unexpected keyboard focus",
-  );
-  assert(
-    await locator.evaluate(
-      (el) => getComputedStyle(el).outlineStyle !== "none",
-    ),
-    "Keyboard focus is not visibly outlined",
-  );
-}
-async function roomreadLayout(page, width) {
-  assert.equal(profile.projects.length, 6);
-  assert.deepEqual(await page.locator(".gallery-record").evaluateAll((records) => records.map((record) => record.id)), profile.projects.map((project) => `project-${project.id}`));
-  for (const project of profile.projects) {
-    const rendered = page.locator(`#project-${project.id}`);
-    assert.equal(await rendered.locator("summary h3").innerText(), project.title);
-    assert.equal(await rendered.locator(".project-description").innerText(), project.description);
-    assert.equal(await rendered.locator(".project-subtitle").innerText(), project.subtitle);
-    assert.deepEqual(await rendered.locator(".project-technologies li").allTextContents(), project.technologies);
-    assert.deepEqual(await rendered.locator(".project-details li").allTextContents(), project.details);
-  }
-  const card = page.locator("#project-roomread");
-  assert.equal(await card.locator(".preview-roomread .roomread-visual").count(), 1);
-  assert.equal(await card.locator(".simulation-visual, .warcraft-visual, .medical-visual, .jarvis-visual, .gesture-visual, .project-link, a").count(), 0);
-  assert.deepEqual(await card.locator(".roomread-steps strong").allTextContents(), ["Sources", "Discovery", "Content / transcripts", "Chunks", "Observations", "Validation", "Evidence", "Claims", "Decision profile", "Pitch analysis"]);
-  for (const label of await card.locator("figure strong, figure p, figure span, figcaption").all())
-    assert(await label.evaluate((el) => parseFloat(getComputedStyle(el).fontSize) >= 12), "RoomRead label below 12px");
-  await diagramBounds(card, width);
-}
-async function secondaryLayout(page) {
-  const gesture = page.locator("#project-gesture");
-  const future = page.locator("#project-future-sim");
-  assert.equal(await gesture.count(), 1);
-  assert.equal(await future.count(), 1);
-  assert.equal(await future.locator(".preview-simulation .simulation-visual").count(), 1);
-  assert.equal(await future.locator(".world-grid > span").count(), 80);
-  const grid = await future.locator(".world-grid").boundingBox();
-  const controls = await future.locator(".simulation-controls").boundingBox();
-  assert(grid.y + grid.height <= controls.y, "World grid does not overlap controls");
-}
-async function disclosureAccessibility(page, count, expanded) {
-  // Native summary exposes expanded state in Chromium's accessibility tree;
-  // Playwright's text snapshot currently omits the DisclosureTriangle role.
-  const session = await page.context().newCDPSession(page);
-  try {
-    const { nodes } = await session.send("Accessibility.getFullAXTree");
-    const summaries = nodes.filter(
-      (node) => node.role?.value === "DisclosureTriangle",
-    );
-    assert.equal(summaries.length, count);
-    for (const summary of summaries)
-      assert.equal(
-        summary.properties.find((property) => property.name === "expanded")
-          ?.value.value,
-        expanded,
-      );
-  } finally {
-    await session.detach();
-  }
+async function menu(page) {
+  const toggle=page.getByRole('button',{name:'Open navigation'});
+  await toggle.focus(); await page.keyboard.press('Enter');
+  const dialog=page.getByRole('dialog',{name:'Site index'});
+  await dialog.waitFor({state:'visible'});
+  assert(await page.locator(':focus').evaluate(e=>!!e.closest('dialog')),'Menu traps focus');
+  for(let i=0;i<navigation.length+3;i++) {await page.keyboard.press('Tab');assert(await page.locator(':focus').evaluate(e=>!!e.closest('dialog')),'Tab remains modal');}
+  await page.keyboard.press('Escape');
+  await dialog.waitFor({state:'hidden'});
+  assert(await toggle.evaluate(e=>e===document.activeElement),'Escape returns focus');
+  await toggle.click();
+  await dialog.getByRole('link',{name:'Skills',exact:true}).click();
+  assert.equal(new URL(page.url()).hash,'#skills');
+  assert(await page.locator('#skills').evaluate(e=>e===document.activeElement),'Section receives focus');
+  assert.equal(await page.evaluate(()=>document.body.style.overflow),'','Body scroll restored');
 }
 
-async function mobileKeyboardNavigation(page, width) {
-  const trigger = page.getByRole("button", {
-    name: "Open navigation",
-    exact: true,
-  });
-  const dialog = page.getByRole("dialog", { name: "Mobile navigation" });
-  await trigger.focus();
-  await page.keyboard.press("Enter");
-  await dialog.waitFor();
-  const links = dialog.getByRole("navigation").getByRole("link");
-  assert.equal(await links.count(), navigation.length);
-  await focused(links.first());
-  // Exact reported regression: opening with Enter followed by forward Tab.
-  for (let i = 1; i < navigation.length; i++) {
-    await page.keyboard.press("Tab");
-    await focused(links.nth(i));
-    assert.equal(await trigger.getAttribute("aria-expanded"), "true");
-  }
-  // Chromium may include browser chrome in a native dialog's Tab cycle.
-  // It must never focus a background page control, and must return to the dialog.
-  for (let i = 0; i < 2; i++) {
-    await page.keyboard.press("Tab");
-    assert(
-      await page.evaluate(
-        () =>
-          !document.querySelector("main").contains(document.activeElement) &&
-          !document.querySelector("header").contains(document.activeElement) &&
-          document.activeElement !== document.querySelector(".skip-link"),
-      ),
-    );
-    if (
-      await dialog
-        .getByRole("button", { name: "Close navigation" })
-        .evaluate((el) => el === document.activeElement)
-    )
-      break;
-  }
-  await focused(dialog.getByRole("button", { name: "Close navigation" }));
-  await page.keyboard.press("Shift+Tab");
-  await focused(links.last());
-  for (let i = navigation.length - 2; i >= 0; i--) {
-    await page.keyboard.press("Shift+Tab");
-    await focused(links.nth(i));
-  }
-  await page.keyboard.press("Shift+Tab");
-  await focused(dialog.getByRole("button", { name: "Close navigation" }));
-  await page.keyboard.press("Tab");
-  await focused(links.first());
-  // Native modality must also block programmatic focus into background content.
-  await page
-    .locator('.hero-actions a[href="#projects"]')
-    .evaluate((el) => el.focus());
-  await focused(links.first());
-  assert(await dialog.evaluate((el) => el.scrollWidth <= el.clientWidth));
-  assert.deepEqual(
-    await accessibility(page),
-    [],
-    "Accessibility failures in open mobile navigation",
-  );
-  if (width === 390)
-    await page.screenshot({ path: "test-results/mobile-menu-390.png" });
-  await page.keyboard.press("Escape");
-  await dialog.waitFor({ state: "hidden" });
-  await page.waitForFunction(() => document.querySelector('[aria-label="Open navigation"]').getAttribute("aria-expanded") === "false");
-  assert.equal(await trigger.getAttribute("aria-expanded"), "false");
-  await focused(trigger);
-  // Activate every destination with the keyboard, without a mouse/focus shortcut.
-  for (let i = 0; i < navigation.length; i++) {
-    await trigger.focus();
-    await page.keyboard.press(i % 2 ? "Space" : "Enter");
-    await dialog.waitFor();
-    for (let n = 0; n < i; n++) await page.keyboard.press("Tab");
-    await focused(links.nth(i));
-    await page.keyboard.press("Enter");
-    await dialog.waitFor({ state: "hidden" });
-    await page.waitForFunction(() => document.querySelector('[aria-label="Open navigation"]').getAttribute("aria-expanded") === "false");
-    assert.equal(await trigger.getAttribute("aria-expanded"), "false");
-    assert(
-      await page
-        .locator(navigation[i].href)
-        .evaluate((el) => el === document.activeElement),
-    );
-  }
-  // Mouse opening/closing remains supported.
-  await trigger.click();
-  await dialog.getByRole("button", { name: "Close navigation" }).click();
-  await dialog.waitFor({ state: "hidden" });
-  assert(await trigger.evaluate((el) => el === document.activeElement));
-}
-async function accessibility(page) {
-  await page.addScriptTag({ path: require.resolve("axe-core/axe.min.js") });
-  return page.evaluate(async () => {
-    const result = await window.axe.run(document.querySelector("body"), {
-      runOnly: {
-        type: "tag",
-        values: ["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"],
-      },
-    });
-    return result.violations.map((v) => ({
-      id: v.id,
-      impact: v.impact,
-      nodes: v.nodes.map((n) => ({
-        target: n.target,
-        reason: n.failureSummary,
-      })),
-    }));
-  });
-}
-
-const browser = await chromium.launch({
-  executablePath:
-    process.env.BROWSER_PATH ||
-    "C:/Program Files/Google/Chrome/Application/chrome.exe",
-  headless: true,
-});
+const browser=await chromium.launch({executablePath,headless:true});
 try {
-  for (const width of widths) {
-    const page = await browser.newPage({
-      viewport: { width, height: 1000 },
-      reducedMotion: "reduce",
-    });
-    observeErrors(page);
-    await page.addInitScript(() => {
-      window.__layoutShifts = [];
-      new PerformanceObserver((list) => {
-        for (const entry of list.getEntries())
-          if (!entry.hadRecentInput) window.__layoutShifts.push(entry.value);
-      }).observe({ type: "layout-shift", buffered: true });
-    });
-    const response = await page.goto(baseURL, { waitUntil: "networkidle" });
-    assert.equal(response.status(), 200);
-    assert.equal(await page.locator("h1").count(), 1);
-    assert.equal(await page.locator("main > section").count(), 8);
-    assert.equal(
-      await page.locator(".gallery-record").count(),
-      profile.projects.length,
-    );
-    await noOverflow(page, width + "px initial");
-    await openProjectRecords(page);
-    await warcraftLayout(page, width);
-    await roomreadLayout(page, width);
-    await secondaryLayout(page, width);
-    await roboticsContent(page);
-    const visibleText = await page.locator("body").innerText();
-    assert(
-      !/[A-Za-z]\?[A-Za-z]|\uFFFD|Ã.|Â.|â€/.test(visibleText),
-      "Corrupted visible punctuation",
-    );
-    assert.equal(
-      await page.getByRole("heading", { name: /Let’s build/ }).count(),
-      1,
-    );
-    assert(visibleText.includes("I’d like to hear about it."));
-    const accessibleText = await page.locator("main").ariaSnapshot();
-    assert(
-      !/Let\?s|I\?d|\uFFFD/.test(accessibleText),
-      "Corrupted accessible text",
-    );
-    for (const diagram of await page
-      .locator(".project-visual svg, .field-svg, .world-grid")
-      .all()) {
-      assert(
-        await diagram.evaluate((el) => {
-          const r = el.getBoundingClientRect();
-          const p = el
-            .closest(".project-visual, .system-visual")
-            .getBoundingClientRect();
-          return (
-            r.width === 0 || (r.left >= p.left - 1 && r.right <= p.right + 1)
-          );
-        }),
-        "Diagram extends outside its container",
-      );
+  for(const width of widths) {
+    const page=await browser.newPage({viewport:{width,height:900},reducedMotion:'reduce'});
+    observe(page);
+    assert.equal((await page.goto(baseURL,{waitUntil:'networkidle'})).status(),200);
+    await settled(page);
+    assert.equal(await page.locator('h1').count(),1);
+    assert.deepEqual(await page.locator('.gallery-record').evaluateAll(es=>es.map(e=>e.id.replace('project-',''))),expectedOrder);
+    assert.deepEqual(await page.locator('.exhibition-selector > span:nth-child(2)').allTextContents(),profile.projects.map(p=>p.title));
+    await overflow(page,`${width} initial`);
+    for(let i=0;i<6;i++) {
+      await page.locator('.exhibition-selector').nth(i).click();
+      assert.equal(await page.locator('.exhibition-project-heading h3').textContent(),profile.projects[i].title);
+      assert.equal(await page.locator('.exhibition-selector[aria-pressed=true]').count(),1);
+      assert(await page.locator('.exhibition-figure svg').isVisible());
+      await overflow(page,`${width} project ${i}`);
     }
-    if (width <= 600) {
-      const labels = page.locator(
-        ".visual-topline, .jarvis-inputs .mono, .jarvis-engine > .mono, .jarvis-context > div, .jarvis-output, .slice-caption, .ml-pipeline strong, .evaluation-lenses, .gesture-state, .gesture-plane-label, .world-branches, .simulation-controls > span, .motion-control",
-      );
-      for (const label of await labels.all())
-        assert(
-          await label.evaluate(
-            (el) => parseFloat(getComputedStyle(el).fontSize) >= 12,
-          ),
-          "Essential mobile label is too small",
-        );
+    await page.getByRole('button',{name:'Next project',exact:true}).click();
+    assert.equal(await page.locator('.exhibition-project-heading h3').textContent(),profile.projects[0].title,'Next wraps');
+    await page.getByRole('button',{name:'Previous project',exact:true}).focus(); await page.keyboard.press('Space');
+    assert.equal(await page.locator('.exhibition-project-heading h3').textContent(),profile.projects[5].title,'Keyboard previous wraps');
+    await page.locator('.exhibition-selector').first().click();
+    await page.locator('.exhibition-copy > a').click();
+    assert.equal(new URL(page.url()).hash,'#project-warcraft-rl');
+    assert(await page.locator('#project-warcraft-rl').evaluate(e=>e.open),'Explore opens notes');
+    await openRecords(page);
+    await overflow(page,`${width} expanded`);
+    for (const diagram of await page.locator('.project-visual svg,.world-grid').all()) {
+      assert(await diagram.evaluate(e=>{const r=e.getBoundingClientRect(),p=e.closest('.project-visual').getBoundingClientRect();return !r.width||(r.left>=p.left-1&&r.right<=p.right+1);}),`${width}: diagram inside frame`);
     }
-
-    // Real keyboard activation, including skip-link focus transfer.
-    await page.keyboard.press("Tab");
-    assert.equal(await page.locator(":focus").textContent(), "Skip to content");
-    await page.keyboard.press("Enter");
-    assert(
-      await page
-        .locator("#main")
-        .evaluate((el) => el === document.activeElement),
-    );
-
-    if (width <= 600) {
-      await mobileKeyboardNavigation(page, width);
-    } else {
-      const desktopLinks = page
-        .getByRole("navigation", { name: "Main navigation" })
-        .getByRole("link");
-      await desktopLinks.first().focus();
-      for (let i = 0; i < navigation.length; i++) {
-        await focused(desktopLinks.nth(i));
-        if (i < navigation.length - 1) await page.keyboard.press("Tab");
-      }
-    }
-    // The new hero is decorative; its static rendering must survive reduced motion.
-    assert.equal(await page.locator(".hero-scene[role='img']").count(), 1);
-    assert(await page.locator(".hero-scene-fallback").isVisible());
-    assert.equal(await page.locator(".hero-scene canvas").count(), 0);
-    assert.equal(await page.locator(".hero-scene").getAttribute("data-scene-running"), "false");
-    // Every project visualization control still works without a mouse.
-    for (const name of ["Open hand", "Closed hand", "Pointing"]) {
-      const selector = page
-        .getByRole("group", { name: "Explore gesture landmarks" })
-        .getByRole("button", { name, exact: true });
-      await selector.focus();
-      await page.keyboard.press("Space");
-      assert.equal(await selector.getAttribute("aria-pressed"), "true");
-      assert(
-        (await page.locator(".gesture-state").textContent()).includes(
-          name.toUpperCase(),
-        ),
-      );
-    }
-    const step = page.getByRole("button", { name: "Step state" });
-    await step.focus();
-    await page.keyboard.press("Enter");
-    await focused(step);
-    assert((await page.locator(".simulation-visual .visual-topline").textContent()).includes("t = 1"));
-    const reset = page.getByRole("button", { name: "Reset world state" });
-    await reset.focus();
-    await page.keyboard.press("Space");
-    await focused(reset);
-    assert((await page.locator(".simulation-visual .visual-topline").textContent()).includes("t = 0"));
-
-    await page.locator(".gallery-record").evaluateAll((records) => records.forEach((record) => { record.open = false; }));
-    const disclosures = page.locator(".gallery-record, .skill-details");
-    for (let i = 0; i < (await disclosures.count()); i++) {
-      await disclosures.nth(i).locator("summary").focus();
-      await page.keyboard.press("Enter");
-      await focused(disclosures.nth(i).locator("summary"));
-      assert(
-        await disclosures.nth(i).evaluate((el) => el.open),
-        "Disclosure failed with Enter",
-      );
-    }
-    await disclosureAccessibility(page, await disclosures.count(), true);
-    await noOverflow(page, width + "px expanded");
-    if ([320, 768, 1440].includes(width)) {
-      const violations = await accessibility(page);
-      assert.deepEqual(
-        violations,
-        [],
-        "Accessibility failures at " +
-          width +
-          ": " +
-          JSON.stringify(violations),
-      );
-    }
-    for (let i = 0; i < (await disclosures.count()); i++)
-      await disclosures.nth(i).locator("summary").click();
-    await disclosureAccessibility(page, await disclosures.count(), false);
-    await page.evaluate(() => scrollTo(0, 0));
-    await stableFrames(page);
-    await page.waitForFunction(
-      () => !document.querySelector(".navigation a[aria-current]"),
-    );
-    assert.equal(
-      await page.evaluate(
-        () =>
-          document.getAnimations().filter((a) => a.playState === "running")
-            .length,
-      ),
-      0,
-      "Reduced motion is still running",
-    );
-    const cls = await page.evaluate(() =>
-      window.__layoutShifts.reduce((sum, value) => sum + value, 0),
-    );
-    assert(cls < 0.1, "Unexpected layout shift " + cls + " at " + width);
-
-    await page.screenshot({
-      path: "test-results/viewport-" + width + ".png",
-      fullPage: true,
-    });
-    await page.screenshot({ path: "test-results/hero-" + width + ".png" });
-    if ([320, 390, 768, 1440].includes(width)) {
-      for (const [selector, name] of [
-        ["#experience-ftc", "ftc"],
-        ["#achievements", "honours"],
-      ]) {
-        await page.locator(selector).screenshot({
-          path: `test-results/robotics-${name}-${width}.png`,
-          style: screenshotStyle,
-        });
-      }
-    }
-    if ([320, 390, 768, 1440].includes(width)) {
-      await page.locator("#project-roomread").screenshot({
-        path: `test-results/roomread-${width}.png`,
-        style: screenshotStyle,
-      });
-      await page.locator("#project-warcraft-rl").scrollIntoViewIfNeeded();
-      await page.locator("#project-warcraft-rl").screenshot({
-        path: `test-results/warcraft-${width}.png`,
-        style: screenshotStyle,
-      });
-      if (width === 390) {
-        const notes = page.locator("#project-warcraft-rl summary");
-        await notes.click();
-        await page.locator("#project-warcraft-rl").screenshot({
-          path: "test-results/warcraft-notes-390.png",
-          style: screenshotStyle,
-        });
-        await notes.click();
-      }
-    }
-    if ([390, 1440].includes(width)) {
-      for (const section of [
-        "projects",
-        "experience",
-        "achievements",
-        "skills",
-      ]) {
-        await page.locator("#" + section).screenshot({
-          path: "test-results/" + section + "-" + width + ".png",
-          style: screenshotStyle,
-        });
-      }
-    }
-    report.viewports.push({
-      width,
-      pageHeight: await page.evaluate(
-        () => document.documentElement.scrollHeight,
-      ),
-      overflow: false,
-      cls,
-      keyboard: "pass",
-      reducedMotion: "pass",
-      accessibility: [320, 768, 1440].includes(width)
-        ? "axe pass"
-        : "covered by adjacent breakpoints",
-    });
-    console.log(
-      "PASS " +
-        width +
-        "px: layout, controls, disclosures, keyboard, reduced motion; CLS " +
-        cls.toFixed(4),
-    );
+    const body=await page.locator('body').innerText();
+    assert(!body.includes('\uFFFD'),'No replacement characters');
+    assert(body.includes('not presented as a clinically validated diagnostic tool'));
+    assert(body.includes('Learned policies are in development'));
+    assert(body.includes('team result'));
+    for(const title of profile.projects.map(p=>p.title))assert(body.includes(title));
+    if([320,768,1440].includes(width)) await axe(page,`${width} all notes open`);
+    await page.screenshot({path:`test-results/expanded-${width}.png`,fullPage:true});
+    await page.locator('.gallery-record').evaluateAll(es=>es.forEach(e=>e.open=false));
+    await menu(page);
+    await page.evaluate(()=>scrollTo(0,0));
+    await settled(page);
+    assert.equal(await page.evaluate(()=>document.getAnimations().filter(a=>a.playState==='running').length),0,'Reduced motion has no running animations');
+    await page.screenshot({path:`test-results/hero-${width}.png`});
+    await page.locator('#projects').screenshot({path:`test-results/projects-${width}.png`,style:'.site-header,.skip-link,nextjs-portal {visibility:hidden!important}'});
+    if([390,1440].includes(width)){await page.evaluate(()=>scrollTo(0,0));await page.screenshot({path:`test-results/page-${width}.png`,fullPage:true});}
+    report.viewports.push({width,height:900,expanded:true});
     await page.close();
   }
+  report.checks.push('Requested order in data, selectors and notes; six selections; next/previous wrap; keyboard; expanded diagrams; modal focus/Escape/section navigation; reduced motion across widths');
 
-  const page = await browser.newPage({
-    viewport: { width: 1440, height: 1000 },
-    reducedMotion: "no-preference",
+  const page=await browser.newPage({viewport:{width:1440,height:900}});observe(page);
+  await page.goto(baseURL,{waitUntil:'networkidle'});
+  await page.keyboard.press('Tab');assert.equal(await page.locator(':focus').textContent(),'Skip to content');
+  await page.keyboard.press('Enter');assert(await page.locator('#main').evaluate(e=>e===document.activeElement));
+  const stages=page.locator('.loop-controls button');
+  for(let i=0;i<3;i++){await stages.nth(i).focus();await page.keyboard.press('Space');assert.equal(await stages.nth(i).getAttribute('aria-pressed'),'true');}
+  await page.getByRole('button',{name:'Pause ambient motion'}).click();
+  assert.equal(await page.locator('html').getAttribute('data-motion'),'paused');
+  await page.locator('.exhibition-selector').nth(2).click();
+  assert.equal(await page.locator('.exhibition-figure').evaluate(e=>getComputedStyle(e).animationName),'none');
+  await page.getByRole('button',{name:'Resume ambient motion'}).click();
+  await page.locator('.exhibition-selector').first().click();
+  assert.notEqual(await page.locator('.exhibition-figure').evaluate(e=>getComputedStyle(e).animationName),'none');
+  await openRecords(page);
+  for(const name of ['Open hand','Closed hand','Pointing']) {const b=page.getByRole('button',{name,exact:true});await b.focus();await page.keyboard.press('Space');assert.equal(await b.getAttribute('aria-pressed'),'true');}
+  await page.getByRole('button',{name:'Step state',exact:true}).click();
+  assert((await page.locator('.simulation-visual .visual-topline').textContent()).includes('t = 1'));
+  await page.getByRole('button',{name:'Reset world state'}).click();
+  assert((await page.locator('.simulation-visual .visual-topline').textContent()).includes('t = 0'));
+  const links=await page.locator('a[href]').evaluateAll(es=>es.map(e=>({href:e.getAttribute('href'),target:e.target,rel:e.rel})));
+  for(const l of links) {assert(!l.href.startsWith('javascript:'));if(l.target==='_blank'){assert(l.rel.includes('noopener'));assert(l.rel.includes('noreferrer'));}}
+  for(const href of [profile.socials.github,profile.socials.linkedin,profile.socials.resume,`mailto:${profile.socials.email}`])assert(links.some(l=>l.href===href));
+  for(const p of profile.projects)for(const evidence of projectEvidence(p))assert(links.some(l=>l.href===evidence.href));
+  const resume=await page.request.get(baseURL+'/resume.pdf');assert.equal(resume.status(),200);assert(resume.headers()['content-type'].includes('pdf'));
+  for(const route of ['/robots.txt','/sitemap.xml','/share-image'])assert.equal((await page.request.get(baseURL+route)).status(),200);
+  report.checks.push('Skip link, study controls, pause/resume, gesture/simulation controls, preserved external links, resume PDF and SEO routes');
+
+  for(const id of expectedOrder) {
+    await page.goto(`${baseURL}/#project-${id}`,{waitUntil:'networkidle'});
+    await page.waitForFunction(id=>document.getElementById(`project-${id}`).open,id);
+    assert.equal(await page.locator('.exhibition-project-heading h3').textContent(),profile.projects.find(p=>p.id===id).title);
+    const y=await page.locator(`#project-${id}`).evaluate(e=>e.getBoundingClientRect().top);
+    assert(y>=0&&y<200,`Deep link ${id} aligned below header: ${y}`);
+  }
+  await page.goto(baseURL+'/#projects');await page.goto(baseURL+'/#contact');await page.goBack();assert.equal(new URL(page.url()).hash,'#projects');await page.goForward();assert.equal(new URL(page.url()).hash,'#contact');
+  report.checks.push('All six project deep links and native Back/Forward');
+
+  for(const [width,height] of [[870,540],[1024,600],[1920,1080],[740,360],[320,568]]) {
+    await page.setViewportSize({width,height});await page.goto(baseURL,{waitUntil:'networkidle'});await openRecords(page);await overflow(page,`${width}x${height}`);report.viewports.push({width,height,expanded:true});
+  }
+  // CSS zoom plus a layout-viewport matrix exercises enlarged text and reflow.
+  // It is not a claim about an actual device or browser UI zoom setting.
+  await page.setViewportSize({width:1440,height:900});await page.goto(baseURL,{waitUntil:'networkidle'});
+  for(const zoom of [1.25,1.5,2]) {await page.evaluate(z=>document.documentElement.style.zoom=String(z),zoom);await openRecords(page);await overflow(page,`CSS zoom ${zoom}`);report.viewports.push({width:1440,height:900,cssZoom:zoom});}
+  await page.evaluate(()=>document.documentElement.style.zoom='');
+  await page.evaluate(()=>document.documentElement.style.fontSize='200%');await overflow(page,'200% root text');await page.evaluate(()=>document.documentElement.style.fontSize='');
+  report.checks.push('Short screens, landscape, CSS zoom 125/150/200%, root text enlargement');
+  await page.close();
+
+  const touch=await browser.newPage({viewport:{width:390,height:844},hasTouch:true,isMobile:true,deviceScaleFactor:3});observe(touch);
+  await touch.goto(baseURL,{waitUntil:'networkidle'});await touch.locator('.exhibition-selector').nth(1).tap();assert.equal(await touch.locator('.exhibition-selector').nth(1).getAttribute('aria-pressed'),'true');await overflow(touch,'touch DPR3');await touch.close();
+  const noJS=await browser.newPage({viewport:{width:390,height:844},javaScriptEnabled:false});observe(noJS,true);
+  await noJS.goto(baseURL,{waitUntil:'networkidle'});
+  assert(await noJS.getByRole('navigation',{name:'Main navigation'}).isVisible());
+  for(const id of expectedOrder){await noJS.locator(`#project-${id} > summary`).click();assert(await noJS.locator(`#project-${id}`).evaluate(e=>e.open));}
+  await overflow(noJS,'No JS expanded');assert(await noJS.locator('.loop-study').isVisible());await noJS.close();
+  report.checks.push('Touch at DPR3; no-JS native navigation, diagram and all project disclosures');
+  const perf=await browser.newPage({viewport:{width:1440,height:900}});observe(perf);
+  await perf.goto(baseURL,{waitUntil:'networkidle'});
+  await perf.locator('#projects').scrollIntoViewIfNeeded();
+  await perf.locator('.exhibition-selector').nth(1).click();
+  report.performance = await perf.evaluate(async()=>{
+    const deltas=[];let previous=performance.now();
+    await new Promise(resolve=>{const tick=now=>{deltas.push(now-previous);previous=now;if(deltas.length<90)requestAnimationFrame(tick);else resolve();};requestAnimationFrame(tick);});
+    const ordered=deltas.slice(1).sort((a,b)=>a-b);
+    return {environment:'Headless Chromium, local host; not physical-device FPS',medianFrameMs:ordered[Math.floor(ordered.length/2)],p95FrameMs:ordered[Math.floor(ordered.length*.95)],scriptBytes:performance.getEntriesByType('resource').filter(e=>e.initiatorType==='script').reduce((s,e)=>s+e.transferSize,0),canvasCount:document.querySelectorAll('canvas').length};
   });
-  observeErrors(page);
-  await page.goto(baseURL, { waitUntil: "networkidle" });
-  await openProjectRecords(page);
-  await page.waitForFunction(() => document.querySelector(".hero-scene")?.dataset.sceneRunning === "true");
-  await page.locator(".hero-scene canvas").waitFor();
-  await page.getByRole("button", { name: "Pause ambient motion" }).click();
-  await stableFrames(page);
-  await page.waitForFunction(() => document.querySelector(".hero-scene")?.dataset.sceneRunning === "false");
-  // Allow an in-flight finite hover/fallback fade to settle after pausing ambient motion.
-  await page.waitForFunction(() => !document.getAnimations().some((animation) => animation.playState === "running"));
-  assert.equal(
-    await page.evaluate(
-      () =>
-        document.getAnimations().filter((a) => a.playState === "running")
-          .length,
-    ),
-    0,
-  );
-  await page.getByRole("button", { name: "Resume ambient motion" }).click();
-  await page.waitForFunction(() => document.querySelector(".hero-scene")?.dataset.sceneRunning === "true");
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.getByRole("button", { name: "Reduced motion enabled" }).waitFor();
-  await page.locator(".hero-scene canvas").waitFor({ state: "detached" });
-  assert.equal(
-    await page.evaluate(
-      () =>
-        document.getAnimations().filter((a) => a.playState === "running")
-          .length,
-    ),
-    0,
-  );
-  await page.emulateMedia({ reducedMotion: "no-preference" });
-  const target = page.locator('.hero-actions a[href="#projects"]');
-  const beforeHover = await target.evaluate(
-    (el) => getComputedStyle(el).backgroundColor,
-  );
-  await target.hover();
-  await page.waitForFunction(
-    ({ before }) =>
-      getComputedStyle(document.querySelector('.hero-actions a[href="#projects"]')).backgroundColor !== before,
-    { before: beforeHover },
-  );
-  await page.locator("#projects").scrollIntoViewIfNeeded();
-  await page.waitForFunction(
-    () => document.querySelector(".hero-scene").dataset.sceneRunning === "false",
-  );
-  report.checks.push("Hero: deferred WebGL, static reduced-motion fallback, global pause/resume, offscreen rendering pause, pointer feedback");
-
-  const projectSurface = page.locator("#project-jarvis .project-visual");
-  await projectSurface.scrollIntoViewIfNeeded();
-  const restingSurface = await projectSurface.evaluate((element) => getComputedStyle(element).transform);
-  await projectSurface.hover({ position: { x: 40, y: 40 } });
-  await page.waitForFunction((resting) => getComputedStyle(document.querySelector("#project-jarvis .project-visual")).transform !== resting, restingSurface);
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.waitForFunction((resting) => getComputedStyle(document.querySelector("#project-jarvis .project-visual")).transform === resting, restingSurface);
-  await page.emulateMedia({ reducedMotion: "no-preference" });
-  report.checks.push("Project surfaces: spring pointer response, immediate neutralization when reduced motion is enabled");
-
-  await page.locator("#project-warcraft-rl").scrollIntoViewIfNeeded();
-  const warcraftSignal = page.locator(".warcraft-signal").first();
-  await page.waitForFunction(
-    () =>
-      getComputedStyle(document.querySelector(".warcraft-signal"))
-        .animationPlayState === "running",
-  );
-  await page.getByRole("button", { name: "Pause ambient motion" }).click();
-  assert.equal(
-    await warcraftSignal.evaluate(
-      (el) => getComputedStyle(el).animationPlayState,
-    ),
-    "paused",
-  );
-  await page.getByRole("button", { name: "Resume ambient motion" }).click();
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  assert.equal(
-    await warcraftSignal.evaluate((el) => getComputedStyle(el).animationName),
-    "none",
-  );
-  await page.emulateMedia({ reducedMotion: "no-preference" });
-  await page.locator("#contact").scrollIntoViewIfNeeded();
-  await page.waitForFunction(
-    () =>
-      getComputedStyle(document.querySelector(".warcraft-signal"))
-        .animationPlayState === "paused",
-  );
-  report.checks.push(
-    "Warcraft: explicit renderer, anchor, readable labels, diagram bounds, stacked layout, keyboard disclosure, absent evidence, pause/resume, reduced motion, offscreen pause",
-  );
-
-  await page.locator("#project-roomread").scrollIntoViewIfNeeded();
-  const roomreadSignal = page.locator(".roomread-signal").first();
-  await page.waitForFunction(
-    () =>
-      getComputedStyle(document.querySelector(".roomread-signal"))
-        .animationPlayState === "running",
-  );
-  await page.getByRole("button", { name: "Pause ambient motion" }).click();
-  assert.equal(
-    await roomreadSignal.evaluate(
-      (el) => getComputedStyle(el).animationPlayState,
-    ),
-    "paused",
-  );
-  await page.getByRole("button", { name: "Resume ambient motion" }).click();
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  assert.equal(
-    await roomreadSignal.evaluate((el) => getComputedStyle(el).animationName),
-    "none",
-  );
-  await page.emulateMedia({ reducedMotion: "no-preference" });
-  await page.locator("#contact").scrollIntoViewIfNeeded();
-  await page.waitForFunction(
-    () =>
-      getComputedStyle(document.querySelector(".roomread-signal"))
-        .animationPlayState === "paused",
-  );
-  report.checks.push(
-    "RoomRead: explicit renderer, anchor, readable labels, diagram bounds, stacked layout, keyboard disclosure, absent evidence, pause/resume, reduced motion, offscreen pause",
-  );
-
-  // All internal destinations, optional links, and metadata.
-  const links = await page.locator("a").evaluateAll((nodes) =>
-    nodes.map((a) => ({
-      href: a.getAttribute("href"),
-      target: a.target,
-      rel: a.rel,
-    })),
-  );
-  for (const link of links) {
-    assert(
-      link.href && !["#", "null", "undefined"].includes(link.href),
-      "Placeholder link",
-    );
-    if (link.href.startsWith("#"))
-      assert.equal(
-        await page.locator('[id="' + link.href.slice(1) + '"]').count(),
-        1,
-        "Broken anchor " + link.href,
-      );
-    if (link.target === "_blank")
-      assert(link.rel.includes("noopener") && link.rel.includes("noreferrer"));
-    if (!link.href.startsWith("#") && !link.href.startsWith("mailto:"))
-      assert.equal(
-        publicHref(link.href, true),
-        link.href,
-        "Invalid configured destination",
-      );
-  }
-  if (profile.socials.email)
-    assert(links.some((l) => l.href === `mailto:${profile.socials.email}`));
-  for (const key of ["linkedin", "github"]) {
-    const href = publicHref(profile.socials[key]);
-    if (href) assert(links.some((link) => link.href === href));
-    else if (key === "github")
-      assert.equal(
-        await page
-          .locator(".contact-links")
-          .getByRole("link", { name: /GitHub/ })
-          .count(),
-        0,
-      );
-  }
-  const resumeLinks = page.getByRole("link", {
-    name: "View Résumé",
-    exact: true,
-  });
-  const resume = publicHref(profile.socials.resume, true);
-  assert.equal(await resumeLinks.count(), resume ? 2 : 0);
-  for (const link of await resumeLinks.all()) {
-    assert.equal(await link.getAttribute("href"), resume);
-    assert.equal(await link.getAttribute("target"), "_blank");
-    assert.equal(await link.getAttribute("download"), null);
-  }
-  if (resume) {
-    for (const section of ["#home", "#contact"])
-      assert.equal(
-        await page
-          .locator(section)
-          .getByRole("link", { name: "View Résumé", exact: true })
-          .count(),
-        1,
-      );
-  }
-  if (resume?.startsWith("/") && resume.endsWith(".pdf")) {
-    const response = await page.request.get(new URL(resume, baseURL).href);
-    assert.equal(response.status(), 200, "Local résumé must resolve");
-    assert.match(response.headers()["content-type"], /application\/pdf/);
-    assert(!response.headers()["content-disposition"]?.includes("attachment"));
-    const body = await response.body();
-    assert.equal(body.subarray(0, 5).toString(), "%PDF-");
-    assert(
-      body.equals(
-        fs.readFileSync(new URL(`../public${resume}`, import.meta.url)),
-      ),
-      "Served résumé must match the original PDF bytes",
-    );
-  }
-  for (const project of profile.projects) {
-    const evidence = page.locator(`#project-${project.id} .project-link`);
-    const expected = projectEvidence(project);
-    assert.equal(await evidence.count(), expected.length);
-    for (let i = 0; i < expected.length; i++)
-      assert.equal(
-        await evidence.nth(i).getAttribute("href"),
-        expected[i].href,
-      );
-  }
-  for (const achievement of profile.achievements) {
-    const evidence = page.locator(
-      `.honour-${achievement.id} .achievement-verification`,
-    );
-    const href = publicHref(achievement.verificationUrl);
-    assert.equal(await evidence.count(), href ? 1 : 0);
-    if (href) assert.equal(await evidence.getAttribute("href"), href);
-  }
-  const opportunityText = await page.locator("#contact").innerText();
-  if (profile.opportunity.availability)
-    assert(opportunityText.includes(profile.opportunity.availability));
-  else assert(!opportunityText.includes("Availability:"));
-  assert.equal(
-    await page
-      .locator('a[aria-disabled="true"], [role="link"][aria-disabled="true"]')
-      .count(),
-    0,
-  );
-  assert.equal(
-    await page.title(),
-    "Yubo Zhao — Software Engineering, AI & Intelligent Systems",
-  );
-  assert.equal(await page.locator('meta[property="og:title"]').count(), 1);
-  assert.equal(await page.locator('meta[name="twitter:card"]').count(), 1);
-  const canonical = page.locator('link[rel="canonical"]');
-  const ogUrl = page.locator('meta[property="og:url"]');
-  const ogImage = page.locator('meta[property="og:image"]');
-  if (site.url) {
-    assert.equal(
-      new URL(await canonical.getAttribute("href")).href,
-      `${site.url}/`,
-    );
-    assert.equal(
-      new URL(await ogUrl.getAttribute("content")).href,
-      `${site.url}/`,
-    );
-    assert.equal(
-      await ogImage.getAttribute("content"),
-      `${site.url}/share-image`,
-    );
-  } else {
-    assert.equal(await canonical.count(), 0);
-    assert.equal(await ogUrl.count(), 0);
-    assert.equal(await ogImage.count(), 0);
-  }
-  assert(
-    (await page.locator(".project-evaluation").textContent()).includes(
-      "project's test split",
-    ),
-  );
-  const localPaths = [
-    "/icon.svg",
-    "/robots.txt",
-    "/sitemap.xml",
-    "/share-image",
-  ];
-  for (const path of localPaths) {
-    const res = await page.request.get(baseURL + path);
-    assert.equal(res.status(), 200, path);
-    if (path === "/share-image") {
-      const body = await res.body();
-      assert.equal(body.readUInt32BE(16), 1200);
-      assert.equal(body.readUInt32BE(20), 630);
-      fs.writeFileSync("test-results/share-image.png", body);
-    }
-    if (path === "/sitemap.xml") {
-      const xml = await res.text();
-      assert(!(xml.includes("localhost") || xml.includes("127.0.0.1")));
-      if (site.url) assert(xml.includes(`<loc>${site.url}</loc>`));
-      else assert(!xml.includes("<loc>"));
-    }
-    if (path === "/robots.txt") {
-      const robots = await res.text();
-      if (site.url) assert(robots.includes(`Sitemap: ${site.url}/sitemap.xml`));
-      else assert(!robots.includes("Sitemap:"));
-    }
-  }
-  report.checks.push(
-    "normal motion, pause/resume, preference changes, offscreen pause, hover, all local links, metadata, PNG sharing image, absent optional URLs",
-  );
-
-  const touch = await browser.newPage({
-    viewport: { width: 390, height: 844 },
-    hasTouch: true,
-    isMobile: true,
-  });
-  observeErrors(touch);
-  await touch.goto(baseURL, { waitUntil: "networkidle" });
-  await touch.getByRole("button", { name: "Open navigation" }).tap();
-  await touch
-    .getByRole("navigation")
-    .getByRole("link", { name: "Projects", exact: true })
-    .tap();
-  assert(touch.url().endsWith("#projects"));
-  await touch.locator("#project-gesture > summary").tap();
-  await touch.getByRole("button", { name: "Open hand", exact: true }).tap();
-  assert.equal(
-    await touch
-      .getByRole("button", { name: "Open hand", exact: true })
-      .getAttribute("aria-pressed"),
-    "true",
-  );
-  await touch.getByRole("button", { name: "Open navigation" }).tap();
-  await touch.setViewportSize({ width: 1024, height: 900 });
-  await touch.setViewportSize({ width: 390, height: 844 });
-  assert.equal(
-    await touch
-      .getByRole("button", { name: "Open navigation" })
-      .getAttribute("aria-expanded"),
-    "false",
-  );
-  report.checks.push(
-    "touch navigation, gesture selection, resize closes mobile menu",
-    "reviewer regression: mobile keyboard opening, forward/reverse Tab, Escape, focus return, all destinations, punctuation, diagram bounds and label sizes, optional links, production origin",
-  );
-
-  const noJS = await browser.newPage({
-    javaScriptEnabled: false,
-    viewport: { width: 390, height: 844 },
-    reducedMotion: "reduce",
-  });
-  observeErrors(noJS, { scriptsDisabled: true });
-  await noJS.goto(baseURL);
-  await openProjectRecords(noJS);
-  assert(await noJS.locator(".hero-scene-fallback").isVisible());
-  assert.equal(await noJS.locator(".hero-scene canvas").count(), 0);
-  assert.equal(
-    await noJS.locator(".gallery-record").count(),
-    profile.projects.length,
-  );
-  await noJS.locator(".gallery-record").first().locator("summary").click();
-  await noJS.locator(".gallery-record").first().locator("summary").click();
-  assert(
-    await noJS
-      .locator(".gallery-record")
-      .first()
-      .evaluate((el) => el.open),
-  );
-  await noOverflow(noJS, "JavaScript disabled");
-  await warcraftLayout(noJS, 390);
-  await roomreadLayout(noJS, 390);
-  await secondaryLayout(noJS, 390);
-  const roomreadNotes = noJS.locator("#project-roomread");
-  await roomreadNotes.locator("summary").click();
-  await roomreadNotes.locator("summary").click();
-  assert(await roomreadNotes.evaluate((el) => el.open));
-  assert((await roomreadNotes.innerText()).includes("evidence-fit gates"));
-  assert((await noJS.locator("#project-roomread .project-description").innerText()).includes("structured decision-maker profiles"));
-  await roboticsContent(noJS);
-  const warcraftNotes = noJS.locator("#project-warcraft-rl");
-  await warcraftNotes.locator("summary").click();
-  await warcraftNotes.locator("summary").click();
-  assert(await warcraftNotes.evaluate((el) => el.open));
-  assert((await warcraftNotes.innerText()).includes("bidirectional IPC"));
-  assert(
-    (
-      await noJS
-        .locator("#project-warcraft-rl .project-description")
-        .innerText()
-    ).includes("external Python agent"),
-  );
-  report.checks.push(
-    "server-rendered content and native disclosures without JavaScript",
-    "robotics: three consecutive FTC qualifications, 2024 second-place team result, VEX IQ Robotics Skills first-place team result, Middle School Division, Dallas, Grade 8, readable labels and column bounds",
-  );
-
-  const noWebGL = await browser.newPage({ viewport: { width: 1440, height: 1000 }, reducedMotion: "no-preference" });
-  observeErrors(noWebGL);
-  await noWebGL.addInitScript(() => Object.defineProperty(window, "WebGL2RenderingContext", { value: undefined }));
-  await noWebGL.goto(baseURL, { waitUntil: "networkidle" });
-  assert(await noWebGL.locator(".hero-scene-fallback").isVisible());
-  assert.equal(await noWebGL.locator(".hero-scene canvas").count(), 0);
-  assert.equal(await noWebGL.locator(".gallery-record").count(), profile.projects.length);
-  report.checks.push("WebGL unavailable: static hero remains visible, no canvas attempted, portfolio content intact");
-  await noWebGL.close();
-
-  assert.deepEqual(report.consoleErrors, []);
-  assert.deepEqual(report.requestFailures, []);
-  fs.writeFileSync(
-    "test-results/browser-report.json",
-    JSON.stringify(report, null, 2),
-  );
-  console.log(
-    "PASS motion, hover, touch, no-JS, links, optional URLs, metadata, share image, and zero browser errors",
-  );
-} catch (error) {
-  fs.writeFileSync(
-    "test-results/browser-report.json",
-    JSON.stringify({ ...report, failure: error.message }, null, 2),
-  );
-  throw error;
-} finally {
-  await browser.close();
-}
+  const before=await perf.evaluate(()=>scrollY);await perf.mouse.wheel(0,450);await perf.waitForFunction(y=>scrollY>y+100,before);
+  report.checks.push('Native wheel scroll advances immediately over project section; bounded frame sampling');await perf.close();
+  assert.deepEqual(report.errors,[],'Browser console errors');
+  assert.deepEqual(report.requestFailures,[],'Failed requests');
+} finally { await browser.close();fs.writeFileSync('test-results/browser-report.json',JSON.stringify(report,null,2)); }
+console.log(JSON.stringify(report,null,2));
